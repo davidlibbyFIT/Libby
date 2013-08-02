@@ -150,11 +150,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	MSG msg;
 	BOOL ret;
 
-
-
 	InitCommonControls();
 	hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
-	SetTimer(hDlg, 0, 100, NULL);
+	SetTimer(hDlg, 0, 200, NULL);
 	SetTimer(hDlg, 1, 100, NULL);
 
 	ShowWindow(hDlg, SW_SHOW);
