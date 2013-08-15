@@ -9,6 +9,8 @@
 #include "AutoFocusAssistant.h"
 #include "ProgressDialog.h"
 
+#include "Polygon.h"
+
 HINSTANCE hInst;
 ProgressDialog g_MyProgress;
 
@@ -17,7 +19,35 @@ HWND g_hProgressDialog = NULL;
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	stAFAssistData stDataStruct;
-	
+
+	{
+		CPolygon myPolly;
+		myPolly.create(4);
+		myPolly.setVertex(0,0,0);
+		myPolly.setVertex(1,9,0);
+		myPolly.setVertex(2,9,9);
+		myPolly.setVertex(3,0,9);
+
+		double area = myPolly.area();
+
+		double per = myPolly.perimeter();
+
+		CPolygon::vertex_t Min,Max;
+		myPolly.GetMbr(Min,Max);
+		
+		int minAngle;
+		int maxAngle;
+		
+		double maxSize,minSize;
+		myPolly.GetFeret(minSize,maxSize,minAngle,maxAngle);
+
+		int gg=1;
+
+		//myPolly.Rotate(-90);
+		//myPolly.GetMbr(Min,Max);
+
+	}
+
 
 
 

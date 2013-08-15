@@ -301,7 +301,7 @@ LRESULT ProgressDialog::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HW
 	if (m_bModal)
 		EndDialog(IDCANCEL);
 	else
-		DestroyWindow();
+		::DestroyWindow(this->m_hWnd);
 
 
 	return 0;
