@@ -39,11 +39,19 @@ public:
     bool   setVertex(int n, double x, double y);
     bool   getVertex(int n, double &x, double &y);
     int    getVertexCount();
-	void   GetMbr(vertex_t &Min,vertex_t &Max);
-	void Rotate(vertex_t& point, vertex_t origin, double angle);
-	void Rotate(double angle);
+	
+	//! Gets the MBR for the current polygon
+	void GetMbr(vertex_t &Min,vertex_t &Max);
+	//! Rotates the point from the given location.
+	void Rotate(vertex_t& point, vertex_t origin, double angleDegrees);
+	//! Rotates Polygon
+	void Rotate(double angleRadians);
+	//! Gets Center point of Poly
 	void GetCenter(vertex_t &center);
+	//! Gets Feret size and angle.
 	void GetFeret(double &minSize,double &maxSize,int &minAngle,int &maxAngle);
+	//! returns the distance between points.
+	double DistanceBetweenPoints(const vertex_t &Point1,const vertex_t &Point2 );
 
 	
 
@@ -52,7 +60,6 @@ public:
     double area();
 	double perimeter();
 
-	double DistanceBetweenPoints(const vertex_t &Point1,const vertex_t &Point2 );
 
 private:
     void   free();

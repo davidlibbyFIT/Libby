@@ -1,0 +1,19 @@
+From a 32-Bit VS Command Line...
+
+vsvars32.bat
+
+
+nmake /f Makefile.vc clean
+nmake /f Makefile.vc
+
+And then from a 64-Bit VS Command Line...
+
+nmake /f Makefile.vc clean
+nmake /f Makefile.vc
+
+The binaries will be deposited in the libtiff folder. I moved them into platform specific 
+libs folder.
+
+It should be noted that we've built libtiff with a modified nmake.opt file. We changed the 
+compiler flags so that libtiff is linked against the "Mulithreaded" VC libs (/MT) instead 
+of the "Multithreaded DLL" VC libs (/MD).

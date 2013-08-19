@@ -33,6 +33,12 @@ CPolygon::CPolygon()
 {
     m_vertexCount = 0;
     m_vertices = 0;
+	
+	//vertex_t point={8.0,8.0};
+	//vertex_t origin={0.0,0.0};
+	//double angleRadians= 45*(3.14159265/180);
+	//Rotate(point, origin, angleRadians);
+	//int aa=1;
 }
 
 /*!
@@ -294,6 +300,20 @@ double CPolygon::perimeter()
 	return sum;
 }
 
+/**
+* FUNCTION DistanceBetweenPoints*
+* @brief Calc distance between 2 points.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 8/16/2013 10:32:29 AM
+*
+* @param Point1 
+* @param Point2 
+*
+* @return double 
+*/
 double CPolygon::DistanceBetweenPoints(const vertex_t &Point1,const vertex_t &Point2 )
 {
 	double firsthalf = pow(Point2.x - Point1.x,2);
@@ -302,11 +322,25 @@ double CPolygon::DistanceBetweenPoints(const vertex_t &Point1,const vertex_t &Po
 	return length;
 }
 
+/**
+* FUNCTION GetMbr*
+* @brief Get Polygon MBR
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 8/16/2013 10:32:52 AM
+*
+* @param Min 
+* @param Max 
+*/
 void CPolygon::GetMbr(vertex_t &Min,vertex_t &Max)
 {
-	Min.x=Min.y=Max.x=Max.y=0;
-
-	for (int i=0; i<m_vertexCount-1; i++)
+	Min.x=Min.y=100000;
+	Max.x=Max.y=-100000;;
+	
+	
+	for (int i=0; i<m_vertexCount; i++)
 	{
 		if(m_vertices[i].x < Min.x)
 			Min.x = m_vertices[i].x;
@@ -322,27 +356,64 @@ void CPolygon::GetMbr(vertex_t &Min,vertex_t &Max)
 
 }
 
+/**
+* FUNCTION Rotate*
+* @brief Rotates line around Center.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 8/16/2013 10:33:12 AM
+*
+* @param point 
+* @param origin 
+* @param angleRadians 
+*/
 void CPolygon::Rotate(vertex_t& point, vertex_t origin, double angleRadians)
 {
 
 	vertex_t newPoint={0,0};
 	double Radius = DistanceBetweenPoints(point,origin);
-	newPoint.x=cos(angleRadians)*(point.x-origin.x)-sin(angleRadians)*(point.y-origin.y)+origin.x;
-	newPoint.y=sin(angleRadians)*(point.x-origin.x)+cos(angleRadians)*(point.y-origin.y)+origin.y;
+	newPoint.x=origin.x+(point.x-origin.x)*cos(angleRadians)-(point.y-origin.y)*sin(angleRadians);
+	newPoint.y=origin.y+(point.y-origin.y)*cos(angleRadians)+(point.x-origin.x)*sin(angleRadians);
 	point=newPoint;
 }
 
-void CPolygon::Rotate(double angle)
+/**
+* FUNCTION Rotate*
+* @brief Rotates Polygon in Degrees
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 8/16/2013 10:33:39 AM
+*
+* @param angleDegrees 
+*/
+void CPolygon::Rotate(double angleDegrees)
 {
-	double radians = angle*(3.14159265/180);
+	double radians = angleDegrees*(3.14159265/180);
 	vertex_t cent ;
+	
 	GetCenter(cent);
-
-	for (int i = 0; i < m_vertexCount; i++)
+	
+	for (int i = 0; 
+		i < m_vertexCount; i++)
 		Rotate(m_vertices[i], cent, radians);
 }
 
 
+/**
+* FUNCTION GetCenter*
+* @brief Gets Center of Polygon
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 8/16/2013 10:33:55 AM
+*
+* @param center 
+*/
 void CPolygon::GetCenter(vertex_t &center)
 {
 	center.x=0;
@@ -359,6 +430,20 @@ void CPolygon::GetCenter(vertex_t &center)
 
 }
 
+/**
+* FUNCTION GetFeret*
+* @brief Gets Feret (Calaper Size of Polygon)
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 8/16/2013 10:34:10 AM
+*
+* @param minSize 
+* @param maxSize 
+* @param minAngle 
+* @param maxAngle 
+*/
 void CPolygon::GetFeret(double &minSize,double &maxSize,int &minAngle,int &maxAngle)
 {
 	minAngle=0;
@@ -373,22 +458,16 @@ void CPolygon::GetFeret(double &minSize,double &maxSize,int &minAngle,int &maxAn
 	minSize=0;
 	maxSize=0;
 
-	if(minSize< (TempWidth>TempHeight)?TempWidth:TempHeight)
-	{
-		minSize=TempWidth>TempHeight?TempWidth:TempHeight;
-	}
-	if(maxSize< (TempWidth<TempHeight)?TempWidth:TempHeight)
-	{
-		maxSize=(TempWidth<TempHeight)?TempWidth:TempHeight;
-	}
+	maxSize = minSize = TempWidth<TempHeight?TempHeight:TempWidth;
 
-	for (int angle=0;angle<=180;angle+=5)
+	for (int angle=0;angle<=180;angle++)
 	{
 
 
 		CPolygon TempPolly;	
-		TempPolly.create(getVertexCount());
-		for (int index=0;index<getVertexCount();index++)
+		int vCount=getVertexCount();
+		TempPolly.create(vCount);
+		for (int index=0;index<vCount;index++)
 		{
 			double x;
 			double y;
@@ -396,8 +475,13 @@ void CPolygon::GetFeret(double &minSize,double &maxSize,int &minAngle,int &maxAn
 			TempPolly.setVertex(index,x,y);
 		}
 
+		if(angle==45)
+		{
+			int aa=1;
+		}
 
 		TempPolly.Rotate(angle);
+		//TempPolly.Rotate(141);
 		TempPolly.GetMbr(tmpMin,tmpMax);
 
 		
@@ -428,7 +512,6 @@ void CPolygon::GetFeret(double &minSize,double &maxSize,int &minAngle,int &maxAn
 			minAngle=angle;
 		}
 
-		int aa=1;
 	}
 
 }
