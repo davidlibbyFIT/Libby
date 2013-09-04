@@ -10,6 +10,8 @@
 #include "ProgressDialog.h"
 
 #include "Polygon.h"
+#include "DebugTimer.h"
+
 
 HINSTANCE hInst;
 ProgressDialog g_MyProgress;
@@ -18,6 +20,8 @@ HWND g_hProgressDialog = NULL;
 
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	SetDebugTimer();
+
 	stAFAssistData stDataStruct;
 
 	{
@@ -73,6 +77,10 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_INITDIALOG:
 		{
+
+			//std::cout << "Function : " << __FUNCTION__ << " : " << __FUNCSIG__ <<std::endl;
+			std::cout << __FILE__ << " " << __LINE__<< " " << __FUNCTION__ << std::endl;
+
 		}
 
 	case WM_COMMAND:
@@ -209,6 +217,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			DispatchMessage(&msg);
 		}
 	}
+
+	Utils::DebugTimer MyTim;
+	MyTim.ReportToDebugTerm();
+	MyTim.WriteToFile("C:\\libby.txt");
 
 
 	return 0;

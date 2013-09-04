@@ -16,6 +16,8 @@
 
 #include "Polygon.h"
 #include "math.h"
+#include "DebugTimer.h"
+#include "DebugTimer.h"
 
 
 /*!
@@ -71,7 +73,8 @@ CPolygon::~CPolygon()
 */
 void CPolygon::free()
 {
-    delete[] m_vertices;
+
+	delete[] m_vertices;
     m_vertexCount = 0;
     m_vertices = 0;
 }
@@ -93,7 +96,9 @@ void CPolygon::free()
 */
 bool CPolygon::create(int n)
 {
-    free();
+	
+
+	free();
     m_vertices = new vertex_t[n];
     if (!m_vertices)
         return(false);
@@ -101,7 +106,9 @@ bool CPolygon::create(int n)
     m_vertexCount = n;
     for (int i=0; i<n; i++)
     {
-        m_vertices[i].x = 0.0;
+		Utils::DebugTimer MyTimer("Inside CPolygon::create Virt Count Loop ");
+
+		m_vertices[i].x = 0.0;
         m_vertices[i].y = 0.0;
     }
     return(true);
@@ -123,7 +130,8 @@ bool CPolygon::create(int n)
 */
 bool CPolygon::setVertex(int n, double x, double y)
 {
-    if ((n < 0) || (n >= m_vertexCount))
+
+	if ((n < 0) || (n >= m_vertexCount))
         return(false);
 
     m_vertices[n].x = x;
@@ -145,7 +153,8 @@ bool CPolygon::setVertex(int n, double x, double y)
 */
 bool CPolygon::getVertex(int n, double &x, double &y)
 {
-    if ((n < 0) || (n >= m_vertexCount))
+
+	if ((n < 0) || (n >= m_vertexCount))
         return(false);
 
     x = m_vertices[n].x;
@@ -184,7 +193,8 @@ int CPolygon::getVertexCount()
 */
 bool CPolygon::createFromVertexList(int vertexCount, const vertex_t *vertices)
 {
-    create(vertexCount);
+
+	create(vertexCount);
     if (m_vertexCount != vertexCount)
         return(false);
 
@@ -208,7 +218,8 @@ bool CPolygon::createFromVertexList(int vertexCount, const vertex_t *vertices)
 */
 bool CPolygon::createFromChain(int linkCount, const unsigned char *links)
 {
-    static const int x_step[9] = {0, 1, 1, 0, -1, -1, -1, 0, 1};
+
+	static const int x_step[9] = {0, 1, 1, 0, -1, -1, -1, 0, 1};
     static const int y_step[9] = {0, 0, 1, 1, 1, 0, -1, -1, -1};
 
     // count the vertices needed
@@ -392,6 +403,8 @@ void CPolygon::Rotate(vertex_t& point, vertex_t origin, double angleRadians)
 */
 void CPolygon::Rotate(double angleDegrees)
 {
+	SetDebugTimer();
+
 	double radians = angleDegrees*(3.14159265/180);
 	vertex_t cent ;
 	
@@ -421,6 +434,7 @@ void CPolygon::GetCenter(vertex_t &center)
 
 	for (int i=0; i<m_vertexCount; i++)
 	{
+		Utils::DebugTimer MyTimew("THis is the Loop in CPolygon::GetCenter");
 		center.x += m_vertices[i].x;
 		center.y += m_vertices[i].y;
 	}
