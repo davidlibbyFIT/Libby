@@ -30,6 +30,9 @@ public:
 		double y;
 	}vertex_t;
 
+	// this is my change
+
+
 	CPolygon();
 	~CPolygon();
 
