@@ -6,6 +6,8 @@
 
 #define SetDebugTimer() Utils::DebugTimer SecretMacroDebugTimer(__FILE__,__FUNCTION__,__LINE__);
 
+//My Crappy Line..
+
 
 typedef struct DebugMapItem
 {
