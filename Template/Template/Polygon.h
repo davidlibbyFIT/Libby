@@ -34,6 +34,7 @@ public:
 
 
 	CPolygon();
+	CPolygon (int n);
 	~CPolygon();
 
     bool   create(int n);
