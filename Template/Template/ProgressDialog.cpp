@@ -262,7 +262,7 @@ LRESULT ProgressDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 	//Show Buisy.. Failing at this now..	
 	//LONG_PTR style = ::GetWindowLongPtr(GetDlgItem(IDC_PROGRESS_BAR), GWL_STYLE);
 	//::SetWindowLongPtr(GetDlgItem(IDC_PROGRESS_BAR), GWL_STYLE,  PBS_MARQUEE);
-	//SendMessage(GetDlgItem(IDC_PROGRESS_BAR), PBM_SETMARQUEE   , TRUE,100); 
+	SendMessage(GetDlgItem(IDC_PROGRESS_BAR), PBM_SETMARQUEE   , TRUE,100); 
 
 	SendMessage(GetDlgItem(IDC_PROGRESS_BAR), PBM_SETRANGE, 0, MAKELPARAM(m_LowRange, m_HiRange));
 	SendMessage(GetDlgItem(IDC_PROGRESS_BAR), PBM_SETPOS, m_Pos, 0);	
