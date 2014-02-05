@@ -1,7 +1,1 @@
 \\tsclient\K
-\\tsclient\J
-\\tsclient\E
-\\tsclient\D
-\\tsclient\C
-\\tsclient\H
-\\tsclient\Z

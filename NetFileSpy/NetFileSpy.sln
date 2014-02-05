@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SqLite", "SqLite\SqLite.vcxproj", "{03153BB8-E22D-4273-A686-9A064C06F8F5}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SqLiteTestApp", "..\SqLiteTestApp\SqLiteTestApp.vcxproj", "{CE623ECD-E9EC-4AA7-93C2-B59E08CF8B95}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetFileSpy", "NetFileSpy\NetFileSpy.vcxproj", "{7F9A6C6F-C578-4F38-BEBB-6A2623CFD34F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{03153BB8-E22D-4273-A686-9A064C06F8F5} = {03153BB8-E22D-4273-A686-9A064C06F8F5}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SqLite", "..\SqLite\SqLite\SqLite.vcxproj", "{03153BB8-E22D-4273-A686-9A064C06F8F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,14 +14,14 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7F9A6C6F-C578-4F38-BEBB-6A2623CFD34F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7F9A6C6F-C578-4F38-BEBB-6A2623CFD34F}.Debug|Win32.Build.0 = Debug|Win32
+		{7F9A6C6F-C578-4F38-BEBB-6A2623CFD34F}.Release|Win32.ActiveCfg = Release|Win32
+		{7F9A6C6F-C578-4F38-BEBB-6A2623CFD34F}.Release|Win32.Build.0 = Release|Win32
 		{03153BB8-E22D-4273-A686-9A064C06F8F5}.Debug|Win32.ActiveCfg = Debug|Win32
 		{03153BB8-E22D-4273-A686-9A064C06F8F5}.Debug|Win32.Build.0 = Debug|Win32
 		{03153BB8-E22D-4273-A686-9A064C06F8F5}.Release|Win32.ActiveCfg = Release|Win32
 		{03153BB8-E22D-4273-A686-9A064C06F8F5}.Release|Win32.Build.0 = Release|Win32
-		{CE623ECD-E9EC-4AA7-93C2-B59E08CF8B95}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CE623ECD-E9EC-4AA7-93C2-B59E08CF8B95}.Debug|Win32.Build.0 = Debug|Win32
-		{CE623ECD-E9EC-4AA7-93C2-B59E08CF8B95}.Release|Win32.ActiveCfg = Release|Win32
-		{CE623ECD-E9EC-4AA7-93C2-B59E08CF8B95}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

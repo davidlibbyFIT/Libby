@@ -113,8 +113,8 @@ int main( int argc,      // Number of strings in array argv
 	const char* data = "Callback function called";
 
 	/* Open database */
-	//rc = sqlite3_open("c:\\work\\libby\\test.db", &db);
-	rc = sqlite3_open(":memory:", &db);
+	rc = sqlite3_open("c:\\work\\libby\\test.db", &db);
+	//rc = sqlite3_open(":memory:", &db);
 
 	if( rc ){
 		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
