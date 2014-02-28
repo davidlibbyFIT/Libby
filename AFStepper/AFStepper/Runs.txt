@@ -78,3 +78,60 @@
 2014-02-14 15:41:22	User Pressed All Stop
 2014-02-14 15:41:22	Init Stepper
 2014-02-14 15:41:30	Manual Move to : 1500000 At Velocity : 250000
+2014-02-26 09:25:47	Found Com Port :COM2
+2014-02-26 09:25:47	User Pressed All Stop
+2014-02-26 09:25:47	Init Stepper
+2014-02-26 09:26:39	Found Com Port :COM2
+2014-02-26 09:26:39	User Pressed All Stop
+2014-02-26 09:26:39	Init Stepper
+2014-02-26 09:26:50	Starting Run of 0 Passes
+2014-02-26 09:26:52	Completed Step :0.5		Move to : 134400		At Velocity : 250000	At current% : 35
+2014-02-26 09:28:26	Found Com Port :COM2
+2014-02-26 09:28:26	User Pressed All Stop
+2014-02-26 09:28:26	Init Stepper
+2014-02-26 09:28:45	Starting Run of 0 Passes
+2014-02-26 09:28:48	Completed Step :0.5		Move to : 134400		At Velocity : 250000	At current% : 35
+2014-02-26 09:28:55	Completed Step :1		Move to : 403200		At Velocity : 50000	At current% : 35
+2014-02-26 09:29:12	Found Com Port :COM2
+2014-02-26 09:29:12	User Pressed All Stop
+2014-02-26 09:29:12	Init Stepper
+2014-02-26 09:29:19	Starting Run of 0 Passes
+2014-02-26 09:29:22	Completed Step :0.5		Move to : 134400		At Velocity : 250000	At current% : 35
+2014-02-26 09:29:45	Completed Step :1		Move to : 403200		At Velocity : 12500	At current% : 35
+2014-02-26 09:29:48	Completed Step :1.5		Move to : 134400		At Velocity : 250000	At current% : 35
+2014-02-26 09:30:11	Completed Step :2		Move to : 403200		At Velocity : 12500	At current% : 35
+2014-02-26 09:30:14	Completed Step :2.5		Move to : 134400		At Velocity : 250000	At current% : 35
+2014-02-26 09:30:23	Found Com Port :COM2
+2014-02-26 09:30:23	User Pressed All Stop
+2014-02-26 09:30:23	Init Stepper
+2014-02-26 13:58:47	Found Com Port :COM2
+2014-02-26 13:58:48	User Pressed All Stop
+2014-02-26 13:58:48	Init Stepper
+2014-02-26 13:59:50	Manual Move to : 51200 At Velocity : 2500
+2014-02-26 14:00:36	User Pressed All Stop
+2014-02-26 14:00:36	Init Stepper
+2014-02-26 14:01:29	Manual Move to : 136533 At Velocity : 10000
+2014-02-26 14:01:57	User Pressed All Stop
+2014-02-26 14:01:57	Init Stepper
+2014-02-26 14:02:12	Manual Move to : 136533 At Velocity : 250000
+2014-02-26 14:02:16	User Pressed All Stop
+2014-02-26 14:02:16	User Pressed All Stop
+2014-02-26 14:02:16	Init Stepper
+2014-02-26 14:04:03	User Pressed All Stop
+2014-02-26 14:04:03	Init Stepper
+2014-02-26 14:04:11	Manual Move to : 1500000 At Velocity : 250000
+2014-02-26 14:05:06	User Pressed All Stop
+2014-02-26 14:05:06	Init Stepper
+2014-02-26 14:05:18	Manual Move to : 256 At Velocity : 250000
+2014-02-26 14:05:26	User Pressed All Stop
+2014-02-26 14:05:26	Init Stepper
+2014-02-26 14:05:30	Manual Move to : 256 At Velocity : 250000
+2014-02-26 14:05:33	User Pressed All Stop
+2014-02-26 14:05:33	Init Stepper
+2014-02-27 09:29:54	Found Com Port :COM2
+2014-02-27 09:29:54	Init Stepper
+2014-02-27 09:30:05	Manual Move to : 1500000 At Velocity : 250000
+2014-02-27 09:30:15	User Pressed All Stop
+2014-02-27 09:30:15	Init Stepper
+2014-02-28 09:29:58	Init Stepper
+2014-02-28 09:29:58	Port Not Open
