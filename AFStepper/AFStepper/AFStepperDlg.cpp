@@ -24,7 +24,7 @@
 #define VELOCITY_MAX 300000
 #define VELOCITY_MIN 100
 
-#define TIME_UPDATE 500
+#define TIME_UPDATE 100
 
 // CAboutDlg dialog used for App About
 
@@ -122,10 +122,15 @@ END_MESSAGE_MAP()
 
 
 // CAFStepperDlg message handlers
+#include <iomanip>      // std::setw
 
 BOOL CAFStepperDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	std::ostringstream TempString;
+	TempString << "Chan [" << std::setw (10) << (5) <<"]\t";
+	std::string bb=TempString.str();
 
 	// Add "About..." menu item to system menu.
 
@@ -206,7 +211,12 @@ BOOL CAFStepperDlg::OnInitDialog()
 
 
 
-	OnBnClickedButtonHome();
+	//OnBnClickedButtonHome();
+	log("Init Stepper");
+	SendCommand("/1m35j256L400K3000f1n2R\r");
+	//SendCommand("/1V250000gZ10000000S03G0R\r");
+	Sleep(1000);
+
 
 	SetTimer(TIMER_LOCATION, TIME_UPDATE, NULL);
 
