@@ -9,7 +9,8 @@
 
 EzStep::EzStep(void)
 {
-	m_serialParams._baud = 9600;
+	//m_serialParams._baud = 9600;
+	m_serialParams._baud = 38400;
 	m_serialParams._data_bits = 8;
 	m_serialParams._parity = 'N';
 	strncpy_s(m_serialParams._port, sizeof(m_serialParams._port), "COM1", _TRUNCATE);
