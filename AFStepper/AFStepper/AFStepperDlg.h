@@ -104,5 +104,7 @@ public:
 	void log(const std::string Info);
 	const std::string currentDateTime();
 
+	afx_msg void OnCbnSelchangeComboPreset();
+	CComboBox m_ComboPreset;
 };
 

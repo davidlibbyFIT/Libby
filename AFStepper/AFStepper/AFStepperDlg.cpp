@@ -17,6 +17,10 @@
 #define new DEBUG_NEW
 #endif
 
+#define PRESET_FAST_MOVE	"Fast Move"
+#define PRESET_4X_300		"4x Obj 300 Micron"
+
+
 #define TIMER_LOCATION 1
 #define TIMER_LONG_TEST 2
 #define STEP_MIN 0
@@ -105,6 +109,7 @@ void CAFStepperDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_SWITCH_STATE, m_SwitchState);
 	DDX_Text(pDX, IDC_EDIT_REPETE_CURRENT, m_Current);
 	DDV_MinMaxInt(pDX, m_Current, 5, 85);
+	DDX_Control(pDX, IDC_COMBO_PRESET, m_ComboPreset);
 }
 
 BEGIN_MESSAGE_MAP(CAFStepperDlg, CDialogEx)
@@ -118,6 +123,7 @@ BEGIN_MESSAGE_MAP(CAFStepperDlg, CDialogEx)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_HOME, &CAFStepperDlg::OnBnClickedButtonHome)
 	ON_STN_CLICKED(IDC_STATIC_LOCATION, &CAFStepperDlg::OnStnClickedStaticLocation)
+	ON_CBN_SELCHANGE(IDC_COMBO_PRESET, &CAFStepperDlg::OnCbnSelchangeComboPreset)
 END_MESSAGE_MAP()
 
 
@@ -127,6 +133,16 @@ END_MESSAGE_MAP()
 BOOL CAFStepperDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	m_ComboPreset.AddString(PRESET_FAST_MOVE);
+	m_ComboPreset.AddString(PRESET_4X_300);
+
+
+	int StrIndex=m_ComboPreset.FindStringExact(0,PRESET_FAST_MOVE);
+	if(CB_ERR!=StrIndex )
+	{
+		m_ComboPreset.SetCurSel(StrIndex);
+	}
 
 	std::ostringstream TempString;
 	TempString << "Chan [" << std::setw (10) << (5) <<"]\t";
@@ -166,22 +182,12 @@ BOOL CAFStepperDlg::OnInitDialog()
 
 	m_Abs_Velocity = 250000;
 	m_AbsPos = STEP_MAX;
-
-	//m_JogPos1=STEP_MAX;
-	//m_JogPos2=STEP_MIN;
-	//m_JogVelocity1=250000;
-	//m_JogVelocity2=250000;
-
-	m_JogPos1=134400;
-	m_JogPos2=403200;
-	m_JogVelocity1=250000;
-	m_JogVelocity2=1250;
 	m_Current=35;
 
 	//m_JogVelocity2=50000;
 
 	m_RepeatCount = 1;
-
+	OnCbnSelchangeComboPreset();
 	
 	UpdateData(false);
 
@@ -646,4 +652,38 @@ const std::string CAFStepperDlg::currentDateTime()
 
 
     return buf;
+}
+
+
+
+
+void CAFStepperDlg::OnCbnSelchangeComboPreset()
+{
+	// TODO: Add your control notification handler code here
+
+	int cursel  = m_ComboPreset.GetCurSel( );
+
+	CString rString;
+	m_ComboPreset.GetLBText(cursel,rString);
+	std::string Preset="Preset set to: ";
+	if(rString==PRESET_FAST_MOVE)
+	{
+		m_JogPos1=STEP_MAX;
+		m_JogPos2=STEP_MIN;
+		m_JogVelocity1=250000;
+		m_JogVelocity2=250000;
+		Preset+=PRESET_FAST_MOVE;
+	}else if (rString==PRESET_4X_300)
+	{
+		m_JogPos1=134400;
+		m_JogPos2=403200;
+		m_JogVelocity1=250000;
+		m_JogVelocity2=1250;
+		Preset+=PRESET_4X_300;
+	}
+
+	log(Preset);
+
+	UpdateData(false);
+
 }
