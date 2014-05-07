@@ -663,6 +663,7 @@ void CAFStepperDlg::OnCbnSelchangeComboPreset()
 
 	int cursel  = m_ComboPreset.GetCurSel( );
 
+
 	CString rString;
 	m_ComboPreset.GetLBText(cursel,rString);
 	std::string Preset="Preset set to: ";
