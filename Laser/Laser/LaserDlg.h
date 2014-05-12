@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "statusbox.h"
 
 
 // CLaserDlg dialog
@@ -29,4 +30,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	CStatusBox m_Status;
 };

@@ -57,6 +57,7 @@ CLaserDlg::CLaserDlg(CWnd* pParent /*=NULL*/)
 void CLaserDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIBBY, m_Status);
 }
 
 BEGIN_MESSAGE_MAP(CLaserDlg, CDialogEx)
@@ -150,4 +151,6 @@ HCURSOR CLaserDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
+
+
 
