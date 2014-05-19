@@ -17,6 +17,7 @@ public:
 	afx_msg void OnPaint();
 
 	void DrawHorizontalGraidentRect(CPaintDC &dc, COLORREF Start, COLORREF End,const CRect &rect );
+	void DrawVerticalGraidentRect(CPaintDC &dc, COLORREF Start, COLORREF End,const CRect &rect );
 
 };
 

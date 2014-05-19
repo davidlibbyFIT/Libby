@@ -49,12 +49,20 @@ void CStatusBox::OnPaint()
 	COLORREF EndYellow = RGB(253,205,7);
 
 	
-	CRect GreenZone(rect.left,rect.top,rect.Width()-60,rect.bottom);
-	//CRect YellowZone(GreenZone.right,GreenZone.top,GreenZone.right+30,GreenZone.bottom);
-	CRect YellowZone(10,10,20,20);
+	CRect GreenZone(0,60,rect.Width(),rect.Height());
+	CRect YellowZone(GreenZone.left,GreenZone.top-30,GreenZone.right,GreenZone.top);
+	CRect RedZone(YellowZone.left,YellowZone.top-30,YellowZone.right,YellowZone.top);
+	//CRect YellowZone(10,10,20,20);
 
-	DrawHorizontalGraidentRect(dc,StartGreen, EndGreen, GreenZone );
-	DrawHorizontalGraidentRect(dc,StartYellow, EndYellow, YellowZone );
+	//DrawHorizontalGraidentRect(dc,StartGreen, EndGreen, GreenZone );
+	//DrawHorizontalGraidentRect(dc,StartYellow, EndYellow, YellowZone );
+	//DrawHorizontalGraidentRect(dc,StartRed, EndRed, RedZone );
+
+
+	DrawVerticalGraidentRect(dc,StartGreen, EndGreen, GreenZone );
+	DrawVerticalGraidentRect(dc,StartYellow, EndYellow, YellowZone );
+	DrawVerticalGraidentRect(dc,StartRed, EndRed, RedZone );
+
 
 
 }
@@ -71,6 +79,22 @@ void CStatusBox::DrawHorizontalGraidentRect(CPaintDC &dc, COLORREF Start, COLORR
 		r = StartRed + (i * (EndRed-StartRed) / rect.Width());
 		g = StartGreen + (i * (EndGreen-StartGreen) / rect.Width());
 		b = StartBlue + (i * (EndBlue-StartBlue) / rect.Width());
-		dc.FillSolidRect(i,0,1,rect.Height(),RGB(r,g,b));
+		dc.FillSolidRect(rect.left+i,rect.top,1,rect.Height(),RGB(r,g,b));
+	}
+}
+
+void CStatusBox::DrawVerticalGraidentRect(CPaintDC &dc, COLORREF Start, COLORREF End,const CRect &rect )
+{
+	int StartRed=GetRValue(Start),StartGreen=GetGValue(Start),StartBlue=GetBValue(Start);
+	int EndRed=GetRValue(End),EndGreen=GetGValue(End),EndBlue=GetBValue(End);
+
+
+	for(int i=0;i<rect.Height();i++)
+	{ 
+		int r,g,b;
+		r = StartRed + (i * (EndRed-StartRed) / rect.Height());
+		g = StartGreen + (i * (EndGreen-StartGreen) / rect.Height());
+		b = StartBlue + (i * (EndBlue-StartBlue) / rect.Height());
+		dc.FillSolidRect(rect.left,rect.top+i,rect.Width(),1,RGB(r,g,b));
 	}
 }
