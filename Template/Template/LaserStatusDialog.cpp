@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "LaserStatusDialog.h"
 
-#define SHRINK_SIZE 185
+#define SHRINK_SIZE 140
 
 
 /**
@@ -164,6 +164,10 @@ LRESULT LaserStatusDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam,
 	GetDlgItem(IDC_STATIC_TEMP).GetClientRect(&m_StaticTempRectangle);
 	GetDlgItem(IDC_STATIC_TEMP).MapWindowPoints(this->m_hWnd,(LPPOINT)&m_StaticTempRectangle,2);
 	
+	std::string WindowText="Laser Dialog ( 488 nm )";
+	this->SetWindowTextW(CA2W(WindowText.c_str()).m_szBuffer);
+
+
 
 	if(m_OnTop)
 	{
@@ -454,20 +458,124 @@ void LaserStatusDialog::DrawTempBackground()
 	RedZone.top-=30;	
 	RedZone.bottom=YellowZone.top;
 
+	RECT NullZone(m_StaticTempRectangle);
+	NullZone.top=NullZone.bottom;
+	NullZone.bottom=NullZone.top+20;
+
+
 	DrawVerticalGraidentRect(hdc,StartGreen, EndGreen, GreenZone );
 	DrawVerticalGraidentRect(hdc,StartYellow, EndYellow, YellowZone );
 	DrawVerticalGraidentRect(hdc,StartRed, EndRed, RedZone );
 
-	SetBkMode(hdc, TRANSPARENT);
+	DrawTempatureScaleText(hdc,RedZone,"60°C");
+	DrawTempatureScaleText(hdc,YellowZone,"50°C");
+	DrawTempatureScaleText(hdc,GreenZone,"40°C");
+	DrawTempatureScaleText(hdc,NullZone,"0°C");
 
-	std::string RedZoneString("90°F");
-	DrawText(hdc,CA2W(RedZoneString.c_str()).m_szBuffer,RedZoneString.size(),&RedZone,DT_CENTER);
+	
+	
+	POINT StartLoc;
+	StartLoc.x=GreenZone.top - 20;
+	StartLoc.y=GreenZone.right+3;
 
-	std::string GreenZoneString("70°F");
-	DrawText(hdc,CA2W(GreenZoneString.c_str()).m_szBuffer,GreenZoneString.size(),&GreenZone,DT_CENTER);
 
-	std::string YellowZoneString("50°F");
-	DrawText(hdc,CA2W(YellowZoneString.c_str()).m_szBuffer,YellowZoneString.size(),&YellowZone,DT_CENTER);
+	int PointerHeight=20;
+	int PointerWidth=50;
+	int PointerOffset=5;
+
+	POINT ptArray[6];
+	ptArray[0]=StartLoc;
+	
+	ptArray[1].x=StartLoc.x+PointerOffset;
+	ptArray[1].y=StartLoc.y-PointerHeight/2;
+
+	ptArray[2].x=ptArray[1].x+PointerWidth;
+	ptArray[2].y=ptArray[1].y;
+
+	ptArray[3].x=ptArray[2].x;
+	ptArray[3].y=StartLoc.y+PointerHeight/2;
+
+	ptArray[4].x=ptArray[1].x;
+	ptArray[4].y=ptArray[3].y;
+
+
+	ptArray[5]=StartLoc;
+
+	RECT PolyTextZone;
+	PolyTextZone.top=ptArray[1].y+2;
+	PolyTextZone.left=ptArray[1].x;
+	PolyTextZone.bottom=ptArray[3].y;
+	PolyTextZone.right=ptArray[3].x;
+
+
+
+
+	int OldPolyFillMode=SetPolyFillMode(hdc,WINDING);
+
+	//Polyline (hdc, ptArray,6 );
+	//PolyDraw(hdc,ptArray,PT_CLOSEFIGURE,6);
+	Polygon(hdc,ptArray,6);
+	SetPolyFillMode(hdc,ALTERNATE);
+
+	DrawTempatureScaleText(hdc,PolyTextZone,"155°C");
 
 	EndPaint( &ps);
+	
+
+}
+
+void LaserStatusDialog::DrawTempatureScaleText(HDC &hdc,RECT DrawArea,std::string TempString)
+{
+	
+	//DrawArea.top-=19;
+
+	HFONT hFont, hOldFont; 
+
+	// Retrieve a handle to the variable stock font.  
+	hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT); 
+
+	LOGFONT LargeFont,SmallFont;
+	GetObject ( hFont, sizeof(LOGFONT), &LargeFont );
+	LargeFont.lfHeight = 20 ;                    // request a 12-pixel-height font
+	_tcsncpy_s(LargeFont.lfFaceName, LF_FACESIZE,  _T("Arial"), 7);
+	SmallFont=LargeFont;
+	
+	HFONT hCustomLargeFont = CreateFontIndirect ( &LargeFont );
+	HFONT hCustomSmallFont = CreateFontIndirect ( &SmallFont );
+
+	int gray=110;
+	COLORREF OldCOlor = SetTextColor(hdc, RGB(gray,gray,gray));
+	
+	hOldFont = (HFONT)SelectObject(hdc, hCustomLargeFont);
+
+	//Build a 1 pix Gray border by drawing the text sihfted in all 4 directions 
+	int oldCkgroundMode = SetBkMode(hdc, TRANSPARENT);
+	int pixAtound =1;
+	DrawArea.top-=pixAtound;
+	DrawText(hdc,CA2W(TempString.c_str()).m_szBuffer,TempString.size(),&DrawArea,DT_CENTER);
+	DrawArea.top+=pixAtound;
+	DrawArea.left-=pixAtound;
+	DrawText(hdc,CA2W(TempString.c_str()).m_szBuffer,TempString.size(),&DrawArea,DT_CENTER);
+	DrawArea.bottom+=pixAtound;
+	DrawArea.left+=pixAtound;
+	DrawText(hdc,CA2W(TempString.c_str()).m_szBuffer,TempString.size(),&DrawArea,DT_CENTER);
+	DrawArea.bottom-=pixAtound;
+	DrawArea.right+=pixAtound;
+	DrawText(hdc,CA2W(TempString.c_str()).m_szBuffer,TempString.size(),&DrawArea,DT_CENTER);	
+	DrawArea.right-=pixAtound;
+	
+	//Now draw the font black Centered.
+	SetTextColor(hdc, RGB(0,0,0));
+	SelectObject(hdc, hCustomSmallFont);
+	DrawText(hdc,CA2W(TempString.c_str()).m_szBuffer,TempString.size(),&DrawArea,DT_CENTER);
+
+	SetBkMode(hdc, oldCkgroundMode  );
+
+	// Restore the original font.        
+	SelectObject(hdc, hOldFont); 
+	// Restore the original Color.        
+	SetTextColor(hdc, OldCOlor);
+
+
+
 }

@@ -43,13 +43,15 @@ public:
 
 	void DrawTempBackground();
 
+	
+
 	LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnMouseLeave(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnWindowPosChanged(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	void DrawHorizontalGraidentRect(HDC &hdc, COLORREF Start, COLORREF End,const RECT &rect );
 	void DrawVerticalGraidentRect(HDC &hdc, COLORREF Start, COLORREF End,const RECT &rect );
-	
+	void DrawTempatureScaleText(HDC &hdc,RECT DrawArea,std::string TempString);
 
 	BEGIN_MSG_MAP(CAFAssistant0)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
