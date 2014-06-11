@@ -8,19 +8,21 @@
 #include <iostream>
 #include "AutoFocusAssistant.h"
 #include "ProgressDialog.h"
+#include "LaserStatusDialog.h"
 
 #include "Polygon.h"
-#include "DebugTimer.h"
+//#include "DebugTimer.h"
 
 
 HINSTANCE hInst;
 ProgressDialog g_MyProgress;
+LaserStatusDialog g_MyLaser;
 
 HWND g_hProgressDialog = NULL;
 
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	SetDebugTimer();
+	//SetDebugTimer();
 
 	stAFAssistData stDataStruct;
 
@@ -80,6 +82,10 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			//std::cout << "Function : " << __FUNCTION__ << " : " << __FUNCSIG__ <<std::endl;
 			std::cout << __FILE__ << " " << __LINE__<< " " << __FUNCTION__ << std::endl;
+			g_MyLaser.SetOnTop(false);
+			g_MyLaser.DoModal();
+			DestroyWindow(hDlg);
+			break;
 
 		}
 
@@ -134,6 +140,7 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case IDCANCEL:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return TRUE;
+			break;
 		case IDC_BUTTON_PROGRESS:
 			{
 				//g_MyProgress.DoModal();
@@ -146,7 +153,19 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 				//g_hProgressDialog = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR),hwnd, ToolDlgProc);
 				int a=1;
+				break;
 			}
+		case IDC_BUTTON_LASER:
+			{
+				//g_MyProgress.DoModal();
+				//g_MyProgress.DoModeless(NULL);
+				g_MyLaser.SetOnTop(false);
+				g_MyLaser.DoModeless(hDlg);
+				//g_hProgressDialog = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR),hwnd, ToolDlgProc);
+				int a=1;
+				break;
+			}
+
 		}
 		break;
 
@@ -218,9 +237,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 
-	Utils::DebugTimer MyTim;
-	MyTim.ReportToDebugTerm();
-	MyTim.WriteToFile("C:\\libby.txt");
+	//Utils::DebugTimer MyTim;
+	//MyTim.ReportToDebugTerm();
+	//MyTim.WriteToFile("C:\\libby.txt");
 
 
 	return 0;

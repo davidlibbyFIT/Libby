@@ -16,8 +16,8 @@
 
 #include "Polygon.h"
 #include "math.h"
-#include "DebugTimer.h"
-#include "DebugTimer.h"
+//#include "DebugTimer.h"
+//#include "DebugTimer.h"
 
 
 
@@ -107,7 +107,7 @@ bool CPolygon::create(int n)
     m_vertexCount = n;
     for (int i=0; i<n; i++)
     {
-		Utils::DebugTimer MyTimer("Inside CPolygon::create Virt Count Loop ");
+//		//Utils::DebugTimer MyTimer("Inside CPolygon::create Virt Count Loop ");
 
 		m_vertices[i].x = 0.0;
         m_vertices[i].y = 0.0;
@@ -404,7 +404,7 @@ void CPolygon::Rotate(vertex_t& point, vertex_t origin, double angleRadians)
 */
 void CPolygon::Rotate(double angleDegrees)
 {
-	SetDebugTimer();
+//	SetDebugTimer();
 
 	double radians = angleDegrees*(3.14159265/180);
 	vertex_t cent ;
@@ -435,7 +435,7 @@ void CPolygon::GetCenter(vertex_t &center)
 
 	for (int i=0; i<m_vertexCount; i++)
 	{
-		Utils::DebugTimer MyTimew("THis is the Loop in CPolygon::GetCenter");
+//		Utils::DebugTimer MyTimew("THis is the Loop in CPolygon::GetCenter");
 		center.x += m_vertices[i].x;
 		center.y += m_vertices[i].y;
 	}

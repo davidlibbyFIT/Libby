@@ -52,11 +52,6 @@ void CStatusBox::OnPaint()
 	CRect GreenZone(0,60,rect.Width(),rect.Height());
 	CRect YellowZone(GreenZone.left,GreenZone.top-30,GreenZone.right,GreenZone.top);
 	CRect RedZone(YellowZone.left,YellowZone.top-30,YellowZone.right,YellowZone.top);
-	//CRect YellowZone(10,10,20,20);
-
-	//DrawHorizontalGraidentRect(dc,StartGreen, EndGreen, GreenZone );
-	//DrawHorizontalGraidentRect(dc,StartYellow, EndYellow, YellowZone );
-	//DrawHorizontalGraidentRect(dc,StartRed, EndRed, RedZone );
 
 
 	DrawVerticalGraidentRect(dc,StartGreen, EndGreen, GreenZone );
