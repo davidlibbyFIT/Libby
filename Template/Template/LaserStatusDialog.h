@@ -13,6 +13,7 @@ class LaserStatusDialog: public CDialogImpl<LaserStatusDialog>
 public:
 	LaserStatusDialog(void);
 	~LaserStatusDialog(void);
+
 	
 	//! Is the dialog Visible.
 	BOOL IsVisible();
@@ -60,6 +61,7 @@ public:
 		MESSAGE_HANDLER(WM_MOUSELEAVE, OnMouseLeave)
 		MESSAGE_HANDLER(WM_WINDOWPOSCHANGED, OnWindowPosChanged)
 		COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnBnClickedCancel)
+		COMMAND_HANDLER(ID_APPLY, BN_CLICKED, OnBnClickedApply)
 	END_MSG_MAP()
 
 	void SetWindowSmall(bool set=true);
@@ -70,10 +72,14 @@ private:
 	BOOL m_bMouseTracking;
 	BOOL m_bIsSmall;
 	RECT m_StaticTempRectangle;
+	int m_Power_mW;
+	CWindow m_StaticStringWavelength;
+	CWindow m_Edit_Power;
 
 
 
 public:
 	LRESULT OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };
 

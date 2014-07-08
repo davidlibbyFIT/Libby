@@ -18,7 +18,8 @@
 LaserStatusDialog::LaserStatusDialog(void):
 	m_bModal (false),
 	m_OnTop(false)
-{
+	, m_Power_mW(0)
+	{
 }
 
 LaserStatusDialog::~LaserStatusDialog(void)
@@ -167,6 +168,22 @@ LRESULT LaserStatusDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam,
 	std::string WindowText="Laser Dialog ( 488 nm )";
 	this->SetWindowTextW(CA2W(WindowText.c_str()).m_szBuffer);
 
+	HFONT MyOldTextFont = GetDlgItem(IDC_STATIC_LASER_NM).GetFont();
+	LOGFONT MyNewFontFont;
+	GetObject ( MyOldTextFont, sizeof(LOGFONT), &MyNewFontFont );
+	MyNewFontFont.lfHeight = 24 ;                    // request a 12-pixel-height font
+	_tcsncpy_s(MyNewFontFont.lfFaceName, LF_FACESIZE,  _T("Arial"), 7);
+	HFONT hCustomFont = CreateFontIndirect ( &MyNewFontFont );
+
+	std::string WaveLength="488 nm";
+	m_StaticStringWavelength=GetDlgItem(IDC_STATIC_LASER_NM);
+	m_StaticStringWavelength.SetWindowTextW(CA2W(WaveLength.c_str()).m_szBuffer);
+
+	std::string Power_mW="50";
+	m_Edit_Power=GetDlgItem(IDC_EDIT_POWER_MW);
+	m_Edit_Power.SetWindowTextW(CA2W(Power_mW.c_str()).m_szBuffer);
+
+	GetDlgItem(IDC_STATIC_LASER_NM).SetFont(hCustomFont);
 
 
 	if(m_OnTop)
@@ -224,6 +241,7 @@ LRESULT LaserStatusDialog::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/,
 */
 void LaserStatusDialog::SetWindowSmall(bool set/*=true*/)
 {
+	return;
 	if(set)
 	{
 		SetWindowPos(NULL,m_SmallRect.left,m_SmallRect.top,m_SmallRect.right-m_SmallRect.left,m_SmallRect.bottom-m_SmallRect.top,SWP_NOZORDER );
@@ -517,7 +535,7 @@ void LaserStatusDialog::DrawTempBackground()
 	Polygon(hdc,ptArray,6);
 	SetPolyFillMode(hdc,ALTERNATE);
 
-	DrawTempatureScaleText(hdc,PolyTextZone,"155°C");
+	DrawTempatureScaleText(hdc,PolyTextZone,"55°C");
 
 	EndPaint( &ps);
 	
@@ -579,3 +597,13 @@ void LaserStatusDialog::DrawTempatureScaleText(HDC &hdc,RECT DrawArea,std::strin
 
 
 }
+
+
+LRESULT LaserStatusDialog::OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	// TODO: Add your control notification handler code here
+
+	return 0;
+}
+
+
