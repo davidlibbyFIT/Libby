@@ -266,6 +266,10 @@ LRESULT BackFlushDlg::OnBnClickedButtonStart(WORD /*wNotifyCode*/, WORD /*wID*/,
 	std::string Count =RetriveStdStringFromCWindow(m_EditBoxCount);
 	m_DoRinse = SendMessage(m_CheckBoxRinse,BM_GETCHECK,0,0);	
 
+	m_ButtonStart.EnableWindow(false);
+	m_ButtonStop.EnableWindow(true);
+
+
 	return 0;
 }
 
@@ -273,6 +277,9 @@ LRESULT BackFlushDlg::OnBnClickedButtonStart(WORD /*wNotifyCode*/, WORD /*wID*/,
 LRESULT BackFlushDlg::OnBnClickedButtonStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	// TODO: Add your control notification handler code here
+	m_ButtonStart.EnableWindow(true);
+	m_ButtonStop.EnableWindow(false);
+
 
 	return 0;
 }
