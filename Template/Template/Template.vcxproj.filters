@@ -54,6 +54,9 @@
     <ClInclude Include="LaserStatusDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BackFlushDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LaserStatusDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BackFlushDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,6 +9,7 @@
 #include "AutoFocusAssistant.h"
 #include "ProgressDialog.h"
 #include "LaserStatusDialog.h"
+#include "BackFlushDlg.h"
 
 #include "Polygon.h"
 //#include "DebugTimer.h"
@@ -17,6 +18,7 @@
 HINSTANCE hInst;
 ProgressDialog g_MyProgress;
 LaserStatusDialog g_MyLaser;
+BackFlushDlg g_MyBackFlush;
 
 HWND g_hProgressDialog = NULL;
 
@@ -82,6 +84,12 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			//std::cout << "Function : " << __FUNCTION__ << " : " << __FUNCSIG__ <<std::endl;
 			std::cout << __FILE__ << " " << __LINE__<< " " << __FUNCTION__ << std::endl;
+
+			
+			//g_MyBackFlush.DoModeless(hDlg);
+			g_MyBackFlush.DoModal();
+			DestroyWindow(hDlg);
+
 			g_MyLaser.SetOnTop(false);
 			g_MyLaser.DoModal();
 			DestroyWindow(hDlg);
