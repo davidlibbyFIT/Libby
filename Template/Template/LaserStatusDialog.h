@@ -28,23 +28,24 @@ public:
 	//! Close the Dialog.
 	void Close();
 
-	//! Track Modal State
-	BOOL m_bModal;
-	//! Always On Top
-	BOOL m_OnTop;
-	//! User Cancel variable.
-	bool m_UserCancel;
 
 	enum { IDD = IDD_DIALOG_LASER };
 
 	//! Constructor.
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+
+	void SetStartStopStatusText();
+
 	//! Paint
 	LRESULT OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	void DrawTempBackground();
 
-	void DrawTempPointer(POINT &StartLoc, HDC hdc);
+	void SetCurrentTempC(double NewTempature);
+	double GetCurrentTempC(){return m_dCurrentTempCelsius;};
+	bool IsLaserRunning(){return m_bLaserOn;};
+
+	void DrawTemperaturePointer(POINT &StartLoc, HDC hdc);
 
 	void DrawLaserStatus(HDC hdc, COLORREF LaserColor);
 
@@ -72,8 +73,17 @@ public:
 	END_MSG_MAP()
 
 	void SetWindowSmall(bool set=true);
+	
 
 private:
+
+	//! Track Modal State
+	BOOL m_bModal;
+	//! Always On Top
+	BOOL m_OnTop;
+	//! User Cancel variable.
+	bool m_UserCancel;
+
 	RECT m_LargeRect;
 	RECT m_SmallRect;
 	BOOL m_bMouseTracking;
@@ -82,10 +92,12 @@ private:
 	RECT m_StaticLaserStatusRectangle;
 	double m_dDegreesCPerPix;
 	double m_dCurrentTempCelsius;
+	bool m_bLaserOn;
 
 	int m_Power_mW;
 	CWindow m_StaticStringWavelength;
 	CWindow m_Edit_Power;
+	CWindow m_Button_Start_Stop;
 
 
 

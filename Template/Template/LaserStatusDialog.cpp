@@ -35,7 +35,7 @@ LaserStatusDialog::LaserStatusDialog(void):
 	, m_Power_mW(0)
 	, m_dDegreesCPerPix (0)
 	,m_dCurrentTempCelsius (0)
-
+	,m_bLaserOn (false)
 
 {
 }
@@ -187,6 +187,12 @@ LRESULT LaserStatusDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam,
 	GetDlgItem(IDC_STATIC_LASER_STATUS).MapWindowPoints(this->m_hWnd,(LPPOINT)&m_StaticLaserStatusRectangle,2);
 
 
+	m_Button_Start_Stop=GetDlgItem(ID_START_STOP);
+
+	SetStartStopStatusText();
+
+
+
 	//Prep out degrees per Pix
 	int recHeight=m_StaticTempRectangle.bottom-m_StaticTempRectangle.top;
 	double temprange = TOP_TEMP_C - BOTTOM_TEMP_C;
@@ -242,6 +248,8 @@ LRESULT LaserStatusDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam,
 */
 LRESULT LaserStatusDialog::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	m_bLaserOn=false;
+
 	if (m_bModal)
 		EndDialog(IDCANCEL);
 	else
@@ -437,7 +445,11 @@ void LaserStatusDialog::DrawHorizontalGraidentRect(HDC &hdc, COLORREF Start, COL
 		b = StartBlue + (i * (EndBlue-StartBlue) / recWidth);
 		RECT RectPlus=rect;
 		RectPlus.left+=i;
-		FillRect(hdc, &RectPlus, CreateSolidBrush(RGB(r,g,b)));
+		
+		HBRUSH brush = CreateSolidBrush(RGB(r,g,b));
+		FillRect(hdc, &RectPlus, brush);
+		DeleteObject(brush);
+
 	}
 
 }
@@ -459,7 +471,11 @@ void LaserStatusDialog::DrawVerticalGraidentRect(HDC &hdc, COLORREF Start, COLOR
 
 		RECT RectPlus=rect;
 		RectPlus.top+=i;
-		FillRect(hdc, &RectPlus, CreateSolidBrush(RGB(r,g,b)));
+
+		HBRUSH brush = CreateSolidBrush(RGB(r,g,b));
+		FillRect(hdc, &RectPlus, brush);
+		DeleteObject(brush);
+
 
 	}
 }
@@ -518,24 +534,24 @@ void LaserStatusDialog::DrawTempBackground()
 	DrawVerticalGraidentRect(hdc,StartYellow, EndYellow, YellowZone );
 	DrawVerticalGraidentRect(hdc,StartRed, EndRed, RedZone );
 
-	DrawTempatureScaleText(hdc,RedZone,"");
-	DrawTempatureScaleText(hdc,YellowZone,"");
-	DrawTempatureScaleText(hdc,GreenZone,"");
+	//DrawTempatureScaleText(hdc,RedZone,"");
+	//DrawTempatureScaleText(hdc,YellowZone,"");
+	//DrawTempatureScaleText(hdc,GreenZone,"");
 	//DrawTempatureScaleText(hdc,NullZone,"");
 
-	m_dCurrentTempCelsius=60;
 	
 	int TempPosFromBottom = (int)(m_dDegreesCPerPix * m_dCurrentTempCelsius);
-
 	
 	POINT StartLoc;
 	StartLoc.x=GreenZone.right+2;
 	StartLoc.y=GreenZone.bottom-TempPosFromBottom;
 
-	DrawTempPointer(StartLoc, hdc);
-	
-	COLORREF LaserColor=RGB(255,0,0);
-	//COLORREF LaserColor=RGB(128,128,128);
+	DrawTemperaturePointer(StartLoc, hdc);
+
+	COLORREF LaserColor=RGB(128,128,128);
+	//If the Laser is on.
+	if(m_bLaserOn)
+		LaserColor=RGB(255,0,0);	
 
 	DrawLaserStatus(hdc, LaserColor);
 
@@ -623,11 +639,22 @@ int LaserStatusDialog::CalculateZoneHeightPix(int Percent, int OverallHeight)
 LRESULT LaserStatusDialog::OnBnClickedStartStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	// TODO: Add your control notification handler code here
+	m_bLaserOn=!m_bLaserOn;
+	
+	SetStartStopStatusText();
+
+	if(IsVisible())
+	{
+		Invalidate();
+		UpdateWindow();
+	}
+
+
 
 	return 0;
 }
 
-void LaserStatusDialog::DrawTempPointer(POINT &StartLoc, HDC hdc)
+void LaserStatusDialog::DrawTemperaturePointer(POINT &StartLoc, HDC hdc)
 {
 	int PointerHeight=20;
 	int PointerWidth=52;
@@ -676,13 +703,16 @@ void LaserStatusDialog::DrawTempPointer(POINT &StartLoc, HDC hdc)
 
 void LaserStatusDialog::DrawLaserStatus(HDC hdc, COLORREF LaserColor)
 {
-	HGDIOBJ originalPen=SelectObject(hdc,GetStockObject(DC_PEN));
-	SelectObject(hdc, GetStockObject(DC_PEN));
-	COLORREF oldPen=SetDCPenColor(hdc, LaserColor);
+	
+	
+	//HGDIOBJ originalPen=SelectObject(hdc,GetStockObject(DC_PEN));
+	//SelectObject(hdc, GetStockObject(DC_PEN));
+	//COLORREF oldPen=SetDCPenColor(hdc, LaserColor);
+	HPEN MyPen=CreatePen(PS_SOLID,2,LaserColor);
+	HGDIOBJ OldStockPen = SelectObject(hdc,MyPen);
+	
+	HBRUSH brush = CreateSolidBrush(LaserColor);
 
-
-	SelectObject(hdc, GetStockObject(DC_BRUSH));
-	COLORREF oldBrush=SetDCBrushColor(hdc, LaserColor);	
 	RECT CenterCircle;
 	int QuarterSize=(m_StaticLaserStatusRectangle.bottom-m_StaticLaserStatusRectangle.top)/2;
 
@@ -695,10 +725,10 @@ void LaserStatusDialog::DrawLaserStatus(HDC hdc, COLORREF LaserColor)
 	CenterCircle.right=CenterCircle.left+CircleSize;
 	CenterCircle.bottom=CenterCircle.top+CircleSize;
 
-
+	HGDIOBJ OldBrush = SelectObject(hdc,brush);
 	Ellipse(hdc,CenterCircle.left,CenterCircle.top,CenterCircle.right,CenterCircle.bottom);
-
-
+	SelectObject(hdc,OldBrush);
+	DeleteObject(brush);
 	// Draw spokes
 	int nOriginX = CirCenterX;
 	int nOriginY = CirCenterY;
@@ -732,8 +762,36 @@ void LaserStatusDialog::DrawLaserStatus(HDC hdc, COLORREF LaserColor)
 	MoveToEx (hdc,CirCenterX,CirCenterY,lpPoint);
 	LineTo(hdc,m_StaticLaserStatusRectangle.right-5,CirCenterY);
 
-	SetDCBrushColor(hdc, oldBrush);	
-	SetDCPenColor(hdc, oldPen);
+	SelectObject(hdc,OldStockPen);
+	DeleteObject(MyPen);
 
 	m_StaticLaserStatusRectangle;
+}
+
+void LaserStatusDialog::SetStartStopStatusText()
+{
+	
+	if(m_bLaserOn)
+	{
+		m_Button_Start_Stop.SetWindowText(L"Stop");
+
+	}else
+	{
+
+		m_Button_Start_Stop.SetWindowText(L"Start");
+	}
+}
+
+void LaserStatusDialog::SetCurrentTempC(double NewTempature)
+{
+	m_dCurrentTempCelsius=NewTempature;
+	static int ct=1;
+	if(IsVisible())
+	{
+		if(ct==74)
+			int dd=1;
+		Invalidate();
+		UpdateWindow();
+		ct++;
+	}
 }
