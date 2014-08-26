@@ -87,8 +87,8 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			
 			//g_MyBackFlush.DoModeless(hDlg);
-			g_MyBackFlush.DoModal();
-			DestroyWindow(hDlg);
+			//g_MyBackFlush.DoModal();
+			//DestroyWindow(hDlg);
 
 			g_MyLaser.SetOnTop(false);
 			g_MyLaser.DoModal();
