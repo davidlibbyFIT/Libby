@@ -111,7 +111,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::cout << "\n";
 
-	//ListDirectoryContents(L"\\\\tsclient\\K\\Employee_Dropboxes\\1.Archive\\Laura_Aurilio\\Laura's laptop archive - sept 19 2011\\Sales Meeting 2011 DVD");
 
 	LPNETRESOURCE lpnr = NULL;
 	g_NetworkThreadHandle =  (HANDLE)_beginthreadex(NULL, 0,FindSharesThreadProc, NULL, 0, NULL);
@@ -200,7 +199,7 @@ bool ListDirectoryContents(const wchar_t *sDir)
 
 
 
-				if(g_InfoQue.size()>1000)
+				if(g_InfoQue.size()>10000)
 				{
 					AtomicCommitQue();
 
@@ -211,6 +210,7 @@ bool ListDirectoryContents(const wchar_t *sDir)
 		}
 	}
 	while(FindNextFile(hFind, &fdFile)); //Find the next file.
+	AtomicCommitQue();
 
 	FindClose(hFind); //Always, Always, clean things up!
 
@@ -519,7 +519,7 @@ bool IsOkDir( std::string &fullpath )
 	// \\FIT\IPC$
 	// \\DC01\NETLOGON
 	// \\DC01\SYSVOL
-
+	std::transform(fullpath.begin(), fullpath.end(),fullpath.begin(), ::toupper);
 
 	//Check for Dir's we don't want.
 	int stringpos =	fullpath.find("IPC$");
@@ -529,6 +529,11 @@ bool IsOkDir( std::string &fullpath )
 		stringpos =	fullpath.find("NETLOGON");
 	if(stringpos<0)
 		stringpos =	fullpath.find("SYSVOL");
+	if(stringpos<0)
+		stringpos =	fullpath.find("\\\\DFS0-S2K12\\FIT_COMMONS");//Special case for FIT to remove a dupe share.
+
+	if(stringpos>-1)
+		int aa=1;
 
 	return (stringpos==-1);
 }
@@ -718,7 +723,21 @@ int InitDb()
 	InitDb = "CREATE  VIEW 'main'.'Directory Size MBytes Round' AS SELECT Run ,FileDir,ROUND(sum(FileSizeKb)/1024,2) as Mbytes  FROM SearchResults group by Run,FileDir order by run,Mbytes desc;";
 	sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
 
+	InitDb = "CREATE INDEX 'Full' ON 'SearchResults' ('Run' ASC, 'FileSizekB' ASC, 'FileName' ASC, 'FileDir' ASC)";
+	sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
 
+	InitDb = "CREATE INDEX 'Run' ON 'SearchResults' ('Run' ASC)";
+	sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
+
+	InitDb = "CREATE INDEX 'Dir' ON 'SearchResults' ('FileDir' ASC)";
+	sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
+
+	InitDb = "CREATE INDEX 'FileName' ON 'SearchResults' ('FileName' ASC)";
+	sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
+
+	InitDb = "CREATE INDEX 'FileSizekB' ON 'SearchResults' ('FileSizekB' ASC)";
+	sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
+	
 
 	if( rc ){
 		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(g_pSqlDB));
@@ -760,15 +779,13 @@ void AtomicCommitQue()
 		InitDb +="'"+tempItem.FileName+"',";
 		InitDb +="'"+tempItem.AlternateFileName+"',";
 		InitDb +="'"+tempItem.FileAttributes+"',";
-		InitDb +="'"+tempItem.FileDir+"');";
-
-		
+		InitDb +="'"+tempItem.FileDir+"');";		
 
 		int aa=1;
 		rc = sqlite3_exec(g_pSqlDB, InitDb.c_str(), callback, 0, &zErrMsg);
 		if( rc!=SQLITE_OK ) 
 		{
-			int problem=1;
+			std::string err = sqlite3_errmsg(g_pSqlDB);
 		}
 	}
 	sqlite3_exec(g_pSqlDB, "COMMIT", 0, 0, 0);

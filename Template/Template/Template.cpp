@@ -87,8 +87,8 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			
 			//g_MyBackFlush.DoModeless(hDlg);
-			g_MyBackFlush.DoModal();
-			DestroyWindow(hDlg);
+			//g_MyBackFlush.DoModal();
+			//DestroyWindow(hDlg);
 
 			g_MyLaser.SetOnTop(false);
 			g_MyLaser.DoModal();
@@ -221,8 +221,31 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
+
+void myFun(char c)
+{
+	char jp[10];
+	for (int i=0; i<10; i++)
+	{
+		jp[i] = c + i;
+	}
+	jp[9] = '\0';
+	printf("%s\n", jp);
+}
+
+
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+
+	char r[1];
+	r[0]='a';
+	myFun('a');
+	for (int i=0; i<200; i++)
+	{
+		printf("%d ", r[i]);
+	}
+
 
 	HWND hDlg;
 	MSG msg;
