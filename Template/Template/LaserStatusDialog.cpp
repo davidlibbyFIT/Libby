@@ -3,6 +3,20 @@
 
 #define SHRINK_SIZE 140
 
+#define RED_ZONE_PERCENT 16
+#define YELLOW_ZONE_PERCENT 16
+#define GREEN_ZONE_PERCENT 68
+
+#define BOTTOM_TEMP_C 0.00
+#define TOP_TEMP_C 60.00
+
+#define PI 3.1415926535898
+
+//Don't compile if we are off in the percent calculation.
+#if RED_ZONE_PERCENT + YELLOW_ZONE_PERCENT + GREEN_ZONE_PERCENT !=100
+	#error All Zone percentages must add up to 100%
+#endif
+
 
 /**
 * CLASS LaserDialog
@@ -16,10 +30,14 @@
 *
 */
 LaserStatusDialog::LaserStatusDialog(void):
-	m_bModal (false),
-	m_OnTop(false)
+	m_bModal (false)
+	, m_OnTop(false)
 	, m_Power_mW(0)
-	{
+	, m_dDegreesCPerPix (0)
+	,m_dCurrentTempCelsius (0)
+	,m_bLaserOn (false)
+
+{
 }
 
 LaserStatusDialog::~LaserStatusDialog(void)
@@ -164,26 +182,38 @@ LRESULT LaserStatusDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 	GetDlgItem(IDC_STATIC_TEMP).GetClientRect(&m_StaticTempRectangle);
 	GetDlgItem(IDC_STATIC_TEMP).MapWindowPoints(this->m_hWnd,(LPPOINT)&m_StaticTempRectangle,2);
-	
+
+	GetDlgItem(IDC_STATIC_LASER_STATUS).GetClientRect(&m_StaticLaserStatusRectangle);
+	GetDlgItem(IDC_STATIC_LASER_STATUS).MapWindowPoints(this->m_hWnd,(LPPOINT)&m_StaticLaserStatusRectangle,2);
+
+
+	m_Button_Start_Stop=GetDlgItem(ID_START_STOP);
+
+	SetStartStopStatusText();
+
+
+
+	//Prep out degrees per Pix
+	int recHeight=m_StaticTempRectangle.bottom-m_StaticTempRectangle.top;
+	double temprange = TOP_TEMP_C - BOTTOM_TEMP_C;
+	m_dDegreesCPerPix = (double)recHeight/temprange;
+
 	std::string WindowText="Laser Dialog ( 488 nm )";
 	this->SetWindowTextW(CA2W(WindowText.c_str()).m_szBuffer);
 
-	HFONT MyOldTextFont = GetDlgItem(IDC_STATIC_LASER_NM).GetFont();
-	LOGFONT MyNewFontFont;
-	GetObject ( MyOldTextFont, sizeof(LOGFONT), &MyNewFontFont );
-	MyNewFontFont.lfHeight = 24 ;                    // request a 12-pixel-height font
-	_tcsncpy_s(MyNewFontFont.lfFaceName, LF_FACESIZE,  _T("Arial"), 7);
-	HFONT hCustomFont = CreateFontIndirect ( &MyNewFontFont );
+	//HFONT MyOldTextFont = GetDlgItem(IDC_STATIC_LASER_NM).GetFont();
+	//LOGFONT MyNewFontFont;
+	//GetObject ( MyOldTextFont, sizeof(LOGFONT), &MyNewFontFont );
+	//MyNewFontFont.lfHeight = 24 ;                    // request a 12-pixel-height font
+	//_tcsncpy_s(MyNewFontFont.lfFaceName, LF_FACESIZE,  _T("Arial"), 7);
+	//HFONT hCustomFont = CreateFontIndirect ( &MyNewFontFont );
 
-	std::string WaveLength="488 nm";
-	m_StaticStringWavelength=GetDlgItem(IDC_STATIC_LASER_NM);
-	m_StaticStringWavelength.SetWindowTextW(CA2W(WaveLength.c_str()).m_szBuffer);
 
 	std::string Power_mW="50";
 	m_Edit_Power=GetDlgItem(IDC_EDIT_POWER_MW);
 	m_Edit_Power.SetWindowTextW(CA2W(Power_mW.c_str()).m_szBuffer);
 
-	GetDlgItem(IDC_STATIC_LASER_NM).SetFont(hCustomFont);
+	//GetDlgItem(IDC_STATIC_LASER_NM).SetFont(hCustomFont);
 
 
 	if(m_OnTop)
@@ -218,6 +248,8 @@ LRESULT LaserStatusDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam,
 */
 LRESULT LaserStatusDialog::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	m_bLaserOn=false;
+
 	if (m_bModal)
 		EndDialog(IDCANCEL);
 	else
@@ -413,7 +445,11 @@ void LaserStatusDialog::DrawHorizontalGraidentRect(HDC &hdc, COLORREF Start, COL
 		b = StartBlue + (i * (EndBlue-StartBlue) / recWidth);
 		RECT RectPlus=rect;
 		RectPlus.left+=i;
-		FillRect(hdc, &RectPlus, CreateSolidBrush(RGB(r,g,b)));
+		
+		HBRUSH brush = CreateSolidBrush(RGB(r,g,b));
+		FillRect(hdc, &RectPlus, brush);
+		DeleteObject(brush);
+
 	}
 
 }
@@ -435,7 +471,11 @@ void LaserStatusDialog::DrawVerticalGraidentRect(HDC &hdc, COLORREF Start, COLOR
 
 		RECT RectPlus=rect;
 		RectPlus.top+=i;
-		FillRect(hdc, &RectPlus, CreateSolidBrush(RGB(r,g,b)));
+
+		HBRUSH brush = CreateSolidBrush(RGB(r,g,b));
+		FillRect(hdc, &RectPlus, brush);
+		DeleteObject(brush);
+
 
 	}
 }
@@ -462,19 +502,28 @@ void LaserStatusDialog::DrawTempBackground()
 	int recWidth=m_StaticTempRectangle.left-m_StaticTempRectangle.right;
 	int recHeight=m_StaticTempRectangle.bottom-m_StaticTempRectangle.top;
 
+	//We will fill the entire rectangle with green then draw in the Red and Yellow Zones.
+	int GreenZoneHeight = CalculateZoneHeightPix(GREEN_ZONE_PERCENT, recHeight);
+	int RedZoneHeight = CalculateZoneHeightPix(RED_ZONE_PERCENT, recHeight);
+	int YellowZoneHeight = CalculateZoneHeightPix(YELLOW_ZONE_PERCENT, recHeight);
+
+	int overallHeight=GreenZoneHeight+RedZoneHeight+YellowZoneHeight;
+	//If there are any rounding errors I want the Green zone to get the additional Pix
+	GreenZoneHeight+=recHeight-overallHeight;
+
 
 	//RECT GreenZone(0,60,recWidth,recHeight);
 	RECT GreenZone(m_StaticTempRectangle);
 	//GreenZone=m_StaticTempRectangle;
-	GreenZone.top+=60;
+	GreenZone.top =GreenZone.bottom-GreenZoneHeight;
 
 	RECT YellowZone(GreenZone);
-	YellowZone.top-=30;
-	YellowZone.bottom=GreenZone.top;
+	YellowZone.top-=YellowZoneHeight;
+	YellowZone.bottom=GreenZone.top+1;
 
 	RECT RedZone(YellowZone);
-	RedZone.top-=30;	
-	RedZone.bottom=YellowZone.top;
+	RedZone.top-=RedZoneHeight;	
+	RedZone.bottom=YellowZone.top+1;
 
 	RECT NullZone(m_StaticTempRectangle);
 	NullZone.top=NullZone.bottom;
@@ -485,57 +534,27 @@ void LaserStatusDialog::DrawTempBackground()
 	DrawVerticalGraidentRect(hdc,StartYellow, EndYellow, YellowZone );
 	DrawVerticalGraidentRect(hdc,StartRed, EndRed, RedZone );
 
-	DrawTempatureScaleText(hdc,RedZone,"60°C");
-	DrawTempatureScaleText(hdc,YellowZone,"50°C");
-	DrawTempatureScaleText(hdc,GreenZone,"40°C");
-	DrawTempatureScaleText(hdc,NullZone,"0°C");
+	//DrawTempatureScaleText(hdc,RedZone,"");
+	//DrawTempatureScaleText(hdc,YellowZone,"");
+	//DrawTempatureScaleText(hdc,GreenZone,"");
+	//DrawTempatureScaleText(hdc,NullZone,"");
 
 	
+	int TempPosFromBottom = (int)(m_dDegreesCPerPix * m_dCurrentTempCelsius);
 	
 	POINT StartLoc;
-	StartLoc.x=GreenZone.top - 20;
-	StartLoc.y=GreenZone.right+3;
+	StartLoc.x=GreenZone.right+2;
+	StartLoc.y=GreenZone.bottom-TempPosFromBottom;
 
+	DrawTemperaturePointer(StartLoc, hdc);
 
-	int PointerHeight=20;
-	int PointerWidth=50;
-	int PointerOffset=5;
+	COLORREF LaserColor=RGB(128,128,128);
+	//If the Laser is on.
+	if(m_bLaserOn)
+		LaserColor=RGB(255,0,0);	
 
-	POINT ptArray[6];
-	ptArray[0]=StartLoc;
-	
-	ptArray[1].x=StartLoc.x+PointerOffset;
-	ptArray[1].y=StartLoc.y-PointerHeight/2;
+	DrawLaserStatus(hdc, LaserColor);
 
-	ptArray[2].x=ptArray[1].x+PointerWidth;
-	ptArray[2].y=ptArray[1].y;
-
-	ptArray[3].x=ptArray[2].x;
-	ptArray[3].y=StartLoc.y+PointerHeight/2;
-
-	ptArray[4].x=ptArray[1].x;
-	ptArray[4].y=ptArray[3].y;
-
-
-	ptArray[5]=StartLoc;
-
-	RECT PolyTextZone;
-	PolyTextZone.top=ptArray[1].y+2;
-	PolyTextZone.left=ptArray[1].x;
-	PolyTextZone.bottom=ptArray[3].y;
-	PolyTextZone.right=ptArray[3].x;
-
-
-
-
-	int OldPolyFillMode=SetPolyFillMode(hdc,WINDING);
-
-	//Polyline (hdc, ptArray,6 );
-	//PolyDraw(hdc,ptArray,PT_CLOSEFIGURE,6);
-	Polygon(hdc,ptArray,6);
-	SetPolyFillMode(hdc,ALTERNATE);
-
-	DrawTempatureScaleText(hdc,PolyTextZone,"55°C");
 
 	EndPaint( &ps);
 	
@@ -606,4 +625,173 @@ LRESULT LaserStatusDialog::OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, 
 	return 0;
 }
 
+int LaserStatusDialog::CalculateZoneHeightPix(int Percent, int OverallHeight)
+{
+	int NewZoneHeight=0;
+	double decPercent=(double)Percent/100.00;	
+	NewZoneHeight = (int)((double)OverallHeight*decPercent);
+	return NewZoneHeight;
+}
 
+
+
+
+LRESULT LaserStatusDialog::OnBnClickedStartStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	// TODO: Add your control notification handler code here
+	m_bLaserOn=!m_bLaserOn;
+	
+	SetStartStopStatusText();
+
+	if(IsVisible())
+	{
+		Invalidate();
+		UpdateWindow();
+	}
+
+
+
+	return 0;
+}
+
+void LaserStatusDialog::DrawTemperaturePointer(POINT &StartLoc, HDC hdc)
+{
+	int PointerHeight=20;
+	int PointerWidth=52;
+	int PointerOffset=5;
+
+	POINT ptArray[6];
+	ptArray[0]=StartLoc;
+
+	ptArray[1].x=StartLoc.x+PointerOffset;
+	ptArray[1].y=StartLoc.y-PointerHeight/2;
+
+	ptArray[2].x=ptArray[1].x+PointerWidth;
+	ptArray[2].y=ptArray[1].y;
+
+	ptArray[3].x=ptArray[2].x;
+	ptArray[3].y=StartLoc.y+PointerHeight/2;
+
+	ptArray[4].x=ptArray[1].x;
+	ptArray[4].y=ptArray[3].y;
+
+
+	ptArray[5]=StartLoc;
+
+	RECT PolyTextZone;
+	PolyTextZone.top=ptArray[1].y+2;
+	PolyTextZone.left=ptArray[1].x;
+	PolyTextZone.bottom=ptArray[3].y;
+	PolyTextZone.right=ptArray[3].x;
+
+	int OldPolyFillMode=SetPolyFillMode(hdc,WINDING);
+	//Polyline (hdc, ptArray,6 );
+	//PolyDraw(hdc,ptArray,PT_CLOSEFIGURE,6);
+	Polygon(hdc,ptArray,6);
+	
+	SetPolyFillMode(hdc,OldPolyFillMode);
+
+	char TempText[20];
+	sprintf_s(TempText,"%.1f°C",m_dCurrentTempCelsius);
+
+	
+
+	DrawTempatureScaleText(hdc,PolyTextZone,TempText);
+
+
+}
+
+void LaserStatusDialog::DrawLaserStatus(HDC hdc, COLORREF LaserColor)
+{
+	
+	
+	//HGDIOBJ originalPen=SelectObject(hdc,GetStockObject(DC_PEN));
+	//SelectObject(hdc, GetStockObject(DC_PEN));
+	//COLORREF oldPen=SetDCPenColor(hdc, LaserColor);
+	HPEN MyPen=CreatePen(PS_SOLID,2,LaserColor);
+	HGDIOBJ OldStockPen = SelectObject(hdc,MyPen);
+	
+	HBRUSH brush = CreateSolidBrush(LaserColor);
+
+	RECT CenterCircle;
+	int QuarterSize=(m_StaticLaserStatusRectangle.bottom-m_StaticLaserStatusRectangle.top)/2;
+
+	int CirCenterX=m_StaticLaserStatusRectangle.left+QuarterSize;
+	int CirCenterY=m_StaticLaserStatusRectangle.top+QuarterSize;
+	int CircleSize =18;
+
+	CenterCircle.top=CirCenterY-CircleSize/2;
+	CenterCircle.left=CirCenterX-CircleSize/2;
+	CenterCircle.right=CenterCircle.left+CircleSize;
+	CenterCircle.bottom=CenterCircle.top+CircleSize;
+
+	HGDIOBJ OldBrush = SelectObject(hdc,brush);
+	Ellipse(hdc,CenterCircle.left,CenterCircle.top,CenterCircle.right,CenterCircle.bottom);
+	SelectObject(hdc,OldBrush);
+	DeleteObject(brush);
+	// Draw spokes
+	int nOriginX = CirCenterX;
+	int nOriginY = CirCenterY;
+	int nRadius = 16;
+	int nSpokes = 16;
+	double fAngle = 2*PI/nSpokes;
+	LPPOINT lpPoint(0);
+	for (int i =0; i<nSpokes; i++)
+	{
+
+		MoveToEx (hdc,nOriginX,nOriginY,lpPoint);
+		int nX = (int)ceil(cos((fAngle)*i)*(nRadius)+nOriginX);
+		int nY = (int)ceil(sin((fAngle)*i)*(nRadius)+nOriginY);
+		LineTo(hdc,nX,nY);
+	}
+
+
+	nRadius = 20;
+	nSpokes = 8;
+	fAngle = 2*PI/nSpokes;
+
+	for (int i =0; i<nSpokes; i++)
+	{
+		LPPOINT lpPoint(0);
+		MoveToEx (hdc,nOriginX,nOriginY,lpPoint);
+		int nX = (int)ceil(cos((fAngle)*i)*(nRadius)+nOriginX);
+		int nY = (int)ceil(sin((fAngle)*i)*(nRadius)+nOriginY);
+		LineTo(hdc,nX,nY);
+	}
+
+	MoveToEx (hdc,CirCenterX,CirCenterY,lpPoint);
+	LineTo(hdc,m_StaticLaserStatusRectangle.right-5,CirCenterY);
+
+	SelectObject(hdc,OldStockPen);
+	DeleteObject(MyPen);
+
+	m_StaticLaserStatusRectangle;
+}
+
+void LaserStatusDialog::SetStartStopStatusText()
+{
+	
+	if(m_bLaserOn)
+	{
+		m_Button_Start_Stop.SetWindowText(L"Stop");
+
+	}else
+	{
+
+		m_Button_Start_Stop.SetWindowText(L"Start");
+	}
+}
+
+void LaserStatusDialog::SetCurrentTempC(double NewTempature)
+{
+	m_dCurrentTempCelsius=NewTempature;
+	static int ct=1;
+	if(IsVisible())
+	{
+		if(ct==74)
+			int dd=1;
+		Invalidate();
+		UpdateWindow();
+		ct++;
+	}
+}

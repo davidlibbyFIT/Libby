@@ -90,9 +90,12 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//g_MyBackFlush.DoModal();
 			//DestroyWindow(hDlg);
 
-			g_MyLaser.SetOnTop(false);
-			g_MyLaser.DoModal();
-			DestroyWindow(hDlg);
+			g_MyLaser.SetOnTop(true);
+			double NewTempature=22;
+			g_MyLaser.SetCurrentTempC(NewTempature);
+			//g_MyLaser.DoModeless();
+
+			//DestroyWindow(hDlg);
 			break;
 
 		}
@@ -196,6 +199,9 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					int a=1;
 				}
+				
+					
+				
 
 				if(g_MyProgress.IsVisible())
 				{
@@ -206,13 +212,26 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					g_MyProgress.SetPosition(g_MyProgress.GetPosition()+1);
 				}
 			}
-			if ( wParam == 1 ) {
+			if ( wParam == 1 ) 
+			{
 				//int pos = SendMessage(This->progress_handle_2, PBM_GETPOS, 0, 0 ) + 1;
 				//SendMessage(This->progress_handle_2, PBM_SETPOS, pos, 0 );
 				//if ( pos == 600 ) {
 				//    SendMessage(This->progress_handle_2, PBM_SETPOS, 0, 0 );
 				// }
 			}
+			if ( wParam == 2 ) 
+			{
+				if(!g_MyLaser.IsLaserRunning())
+					return 0;
+
+				double curTemp=g_MyLaser.GetCurrentTempC();
+				if(curTemp>60.00)
+					g_MyLaser.SetCurrentTempC(0.0);
+				else
+					g_MyLaser.SetCurrentTempC(curTemp+0.1);
+			}
+
 			return 0;
 		}
 
@@ -255,6 +274,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
 	SetTimer(hDlg, 0, 200, NULL);
 	SetTimer(hDlg, 1, 100, NULL);
+	SetTimer(hDlg, 2, 500, NULL);
 
 	ShowWindow(hDlg, SW_SHOW);
 
