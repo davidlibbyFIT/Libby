@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>292</width>
-    <height>233</height>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,11 +32,17 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QTextEdit" name="txtBox">
-        <property name="readOnly">
-         <bool>true</bool>
+       <widget class="QListWidget" name="lstIp">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>100</height>
+         </size>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="lstResult"/>
       </item>
      </layout>
     </item>

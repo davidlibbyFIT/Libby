@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QTcpSocket>
 #include <QScrollBar>
+#include <QNetworkInterface>
 
 static int PORT_NUMBER = 9999;
 static int WAIT_FOR_DATA_MS = 200;
@@ -19,7 +20,9 @@ MainView::MainView(QWidget *parent) :
     connect(m_pServer,&QTcpServer::newConnection,this,&MainView::ExchangeData);
 
 #ifdef ANDROID
-    ui->txtBox->verticalScrollBar()->setStyleSheet("QScrollBar:vertical { width: 100px; }");
+    ui->lstResult->verticalScrollBar()->setStyleSheet("QScrollBar:vertical { width: 100px; }");
+    ui->lstIp->verticalScrollBar()->setStyleSheet("QScrollBar:vertical { width: 100px; }");
+    ui->lstIp->setMinimumHeight(500);
     //QString mystyle = tr("QScrollBar:vertical { width: %1px; }").arg(100);
      //ui->txtBox->verticalScrollBar()->setStyleSheet(mystyle);
 
@@ -39,7 +42,26 @@ void MainView::on_btnStart_clicked()
     {
         ui->btnStart->setEnabled(false);
         ui->btnStop->setEnabled(true);
+
+        QList<QHostAddress> list = QNetworkInterface::allAddresses();
+
+         for(int nIter=0; nIter<list.count(); nIter++)
+
+          {
+              if(!list[nIter].isLoopback())
+                  if (list[nIter].protocol() == QAbstractSocket::IPv4Protocol )
+                qDebug() << list[nIter].toString();
+              QString IpEtc=list[nIter].toString();
+              IpEtc+=":";
+              IpEtc+=QString::number(PORT_NUMBER);
+
+              ui->lstIp->addItem(IpEtc);
+
+          }
+
+
     }
+    ui->lstResult->clear();
 }
 
 void MainView::on_btnStop_clicked()
@@ -47,6 +69,7 @@ void MainView::on_btnStop_clicked()
     StopServer();
     ui->btnStart->setEnabled(true);
     ui->btnStop->setEnabled(false);
+    ui->lstIp->clear();
 }
 
 bool MainView::StartServer()
@@ -92,5 +115,5 @@ void MainView::EchoReadData()
     }
     m_pSocket->write(qPrintable(result));
     m_pSocket->write("\n</EchoServer>\n");
-    ui->txtBox->setText(result);
+    ui->lstResult->addItem(result);
 }
