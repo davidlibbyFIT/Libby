@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 //IN THE SOFTWARE.
 
-//#include <opencv\cv.h>
-//#include <opencv\highgui.h>
+#include <opencv\cv.h>
+#include <opencv\highgui.h>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/opencv.hpp"
