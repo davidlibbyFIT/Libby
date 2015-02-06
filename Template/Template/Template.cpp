@@ -10,6 +10,7 @@
 #include "ProgressDialog.h"
 #include "LaserStatusDialog.h"
 #include "BackFlushDlg.h"
+#include "PMTDlgCtrl.h"
 
 #include "Polygon.h"
 //#include "DebugTimer.h"
@@ -21,6 +22,7 @@ LaserStatusDialog g_MyLaser;
 BackFlushDlg g_MyBackFlush;
 
 HWND g_hProgressDialog = NULL;
+PmtDlgCtrl g_PmtCtrl;
 
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -81,7 +83,8 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_INITDIALOG:
 		{
-
+			
+			
 			//std::cout << "Function : " << __FUNCTION__ << " : " << __FUNCSIG__ <<std::endl;
 			std::cout << __FILE__ << " " << __LINE__<< " " << __FUNCTION__ << std::endl;
 
@@ -164,6 +167,14 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 				//g_hProgressDialog = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR),hwnd, ToolDlgProc);
 				int a=1;
+				break;
+			}
+		case IDC_BUTTON_PMT_LAUNCH:			
+			{
+				g_PmtCtrl.SetOnTop(false);
+				g_PmtCtrl.DoModal();
+				//g_PmtCtrl.DoModeless(hDlg);
+
 				break;
 			}
 		case IDC_BUTTON_LASER:
@@ -269,6 +280,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	HWND hDlg;
 	MSG msg;
 	BOOL ret;
+
+	//g_PmtCtrl.DoModal();
+	//return 0;
 
 	InitCommonControls();
 	hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
