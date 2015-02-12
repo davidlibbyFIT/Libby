@@ -61,7 +61,7 @@ public:
 	void DrawVerticalGraidentRect(HDC &hdc, COLORREF Start, COLORREF End,const RECT &rect );
 	void DrawTempatureScaleText(HDC &hdc,RECT DrawArea,std::string TempString);
 
-	BEGIN_MSG_MAP(CAFAssistant0)
+	BEGIN_MSG_MAP(LaserStatusDialog)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
 		MESSAGE_HANDLER(WM_MOUSEMOVE, OnMouseMove)

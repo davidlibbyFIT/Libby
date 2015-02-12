@@ -13,6 +13,8 @@
 #include "PMTDlgCtrl.h"
 
 #include "Polygon.h"
+#include "Duity.h"
+
 //#include "DebugTimer.h"
 
 
@@ -289,6 +291,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	SetTimer(hDlg, 0, 200, NULL);
 	SetTimer(hDlg, 1, 100, NULL);
 	SetTimer(hDlg, 2, 500, NULL);
+
+	DuityDlg MyDytDlg;
+	MyDytDlg.DoModal();
+	return 0;
 
 	//LaunchPmtDialog();
 	//return 0;
