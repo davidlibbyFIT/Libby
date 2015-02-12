@@ -24,6 +24,8 @@ BackFlushDlg g_MyBackFlush;
 HWND g_hProgressDialog = NULL;
 PmtDlgCtrl g_PmtCtrl;
 
+void LaunchPmtDialog();
+
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//SetDebugTimer();
@@ -171,8 +173,8 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 		case IDC_BUTTON_PMT_LAUNCH:			
 			{
-				g_PmtCtrl.SetOnTop(false);
-				g_PmtCtrl.DoModal();
+				
+				LaunchPmtDialog();
 				//g_PmtCtrl.DoModeless(hDlg);
 
 				break;
@@ -281,14 +283,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	MSG msg;
 	BOOL ret;
 
-	//g_PmtCtrl.DoModal();
-	//return 0;
 
 	InitCommonControls();
 	hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
 	SetTimer(hDlg, 0, 200, NULL);
 	SetTimer(hDlg, 1, 100, NULL);
 	SetTimer(hDlg, 2, 500, NULL);
+
+	//LaunchPmtDialog();
+	//return 0;
+
 
 	ShowWindow(hDlg, SW_SHOW);
 
@@ -308,5 +312,49 @@ int _tmain(int argc, _TCHAR* argv[])
 
 
 	return 0;
+}
+
+void LaunchPmtDialog()
+{
+	{
+		PmtDlgComboItem Single;
+		PmtDlgComboVector ChListVector;
+		Single.UserVisibleName="x1";
+		Single.Data=1;
+		Single.SelectedItem=false;
+		ChListVector.push_back(Single);
+
+		Single.UserVisibleName="x10";
+		Single.Data=10;
+		Single.SelectedItem=true;
+		ChListVector.push_back(Single);
+
+		Single.UserVisibleName="x100";
+		Single.Data=100;
+		Single.SelectedItem=false;
+		ChListVector.push_back(Single);
+		g_PmtCtrl.AddComboListCh1(ChListVector);
+		g_PmtCtrl.AddComboListCh2(ChListVector);
+	}
+	{
+		PmtDlgComboItem Single;
+		PmtDlgComboVector ChListVector;
+		Single.UserVisibleName="10%";
+		Single.Data=10;
+		Single.SelectedItem=true;
+		ChListVector.push_back(Single);
+
+		Single.UserVisibleName="100%";
+		Single.Data=100;
+		Single.SelectedItem=false;
+		ChListVector.push_back(Single);
+
+		g_PmtCtrl.AddComboListLaser(ChListVector);
+	}
+
+
+	g_PmtCtrl.SetCh1WaveLengthString("532nm");
+	g_PmtCtrl.SetCh2WaveLengthString("700nm");
+	g_PmtCtrl.DoModal();
 }
 
