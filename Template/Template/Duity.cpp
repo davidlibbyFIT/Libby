@@ -280,8 +280,8 @@ void DuityDlg::DrawSecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLi
 		RECT DrawArea;
 		DrawArea.top=LastLineEnd-7;
 		DrawArea.bottom=DrawArea.top+15;
-		DrawArea.right=xLineStart+DASH_WIDE_WIDTH-3;
-		DrawArea.left=DrawArea.right+12;
+		DrawArea.left=xLineStart+DASH_WIDE_WIDTH+3;
+		DrawArea.right=DrawArea.left+10;
 
 		DrawDecadeText(hdc ,DrawArea,15,"10");
 
@@ -289,8 +289,8 @@ void DuityDlg::DrawSecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLi
 		_itoa_s(DecadeCount-ct+1, str, 10);
 		std::string DecadeString= str;
 		RECT LittleDrawArea;
-		LittleDrawArea.bottom=DrawArea.top;
-		LittleDrawArea.left=DrawArea.right+10;
+		LittleDrawArea.bottom=DrawArea.top+2;
+		LittleDrawArea.left=DrawArea.right+4;
 		LittleDrawArea.top = LittleDrawArea.bottom - 8 ;
 		LittleDrawArea.right=LittleDrawArea.left + 8;
 
@@ -439,9 +439,12 @@ LRESULT DuityDlg::OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*
 	CWindow SlideWindowHandle=GetDlgItem(pNMHDR->idFrom);
 	RECT Rectangle;
 	SlideWindowHandle.GetClientRect(&Rectangle);
+	
+	HBRUSH brush = CreateSolidBrush(RGB(200,200,200));
+	FillRect(pNMCD->hdc, &Rectangle, brush);
+	DeleteObject(brush);
 
-
-	DrawSecadeLogScale(pNMCD->hdc, Rectangle.top + 14,Rectangle.bottom-15,Rectangle.left+15,4);
+	DrawSecadeLogScale(pNMCD->hdc, Rectangle.top + 13,Rectangle.bottom-14,Rectangle.left+15,4);
 
 	return 0;
 }
