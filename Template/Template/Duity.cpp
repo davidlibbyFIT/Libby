@@ -281,22 +281,22 @@ void DuityDlg::DrawSecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLi
 		DrawArea.top=LastLineEnd-7;
 		DrawArea.bottom=DrawArea.top+15;
 		DrawArea.left=xLineStart+DASH_WIDE_WIDTH+3;
-		DrawArea.right=DrawArea.left+10;
+		DrawArea.right=DrawArea.left+15;
 
-		DrawDecadeText(hdc ,DrawArea,15,"10");
+		DrawDecadeText(hdc ,DrawArea,14,"10");
 
 		char str[20];
 		_itoa_s(DecadeCount-ct+1, str, 10);
 		std::string DecadeString= str;
 		RECT LittleDrawArea;
 		LittleDrawArea.bottom=DrawArea.top+2;
-		LittleDrawArea.left=DrawArea.right+4;
+		LittleDrawArea.left=DrawArea.right;
 		LittleDrawArea.top = LittleDrawArea.bottom - 8 ;
 		LittleDrawArea.right=LittleDrawArea.left + 8;
 
 
 
-		DrawDecadeText(hdc ,LittleDrawArea,12,DecadeString);
+		DrawDecadeText(hdc ,LittleDrawArea,10,DecadeString);
 
 
 
@@ -312,7 +312,7 @@ void DuityDlg::DrawDecadeText(HDC &hdc,RECT DrawArea,int size,std::string TextSt
 	HFONT hFont, hOldFont; 
 
 	// Retrieve a handle to the variable stock font.  
-	hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT); 
+	hFont = (HFONT)GetStockObject(SYSTEM_FONT); 
 
 	LOGFONT LargeFont,SmallFont;
 	GetObject ( hFont, sizeof(LOGFONT), &LargeFont );
@@ -444,7 +444,7 @@ LRESULT DuityDlg::OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*
 	FillRect(pNMCD->hdc, &Rectangle, brush);
 	DeleteObject(brush);
 
-	DrawSecadeLogScale(pNMCD->hdc, Rectangle.top + 13,Rectangle.bottom-14,Rectangle.left+15,4);
+	DrawSecadeLogScale(pNMCD->hdc, Rectangle.top + 13,Rectangle.bottom-14,Rectangle.left+18,4);
 
 	return 0;
 }
