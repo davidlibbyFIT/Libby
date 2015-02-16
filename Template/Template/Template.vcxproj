@@ -86,6 +86,7 @@
     <ClInclude Include="DebugTimer.h" />
     <ClInclude Include="Duity.h" />
     <ClInclude Include="FitBaseDlg.h" />
+    <ClInclude Include="HsfcPMT.h" />
     <ClInclude Include="LaserStatusDialog.h" />
     <ClInclude Include="PMTDlgCtrl.h" />
     <ClInclude Include="Polygon.h" />
@@ -106,6 +107,7 @@
     </ClCompile>
     <ClCompile Include="Duity.cpp" />
     <ClCompile Include="FitBaseDlg.cpp" />
+    <ClCompile Include="HsfcPMT.cpp" />
     <ClCompile Include="LaserStatusDialog.cpp" />
     <ClCompile Include="PMTDlgCtrl.cpp" />
     <ClCompile Include="Polygon.cpp">

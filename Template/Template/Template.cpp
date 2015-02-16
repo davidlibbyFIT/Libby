@@ -14,6 +14,7 @@
 
 #include "Polygon.h"
 #include "Duity.h"
+#include "HsfcPMT.h"
 
 //#include "DebugTimer.h"
 
@@ -292,8 +293,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	SetTimer(hDlg, 1, 100, NULL);
 	SetTimer(hDlg, 2, 500, NULL);
 
-	DuityDlg MyDytDlg;
+	//DuityDlg MyDytDlg;
+	//MyDytDlg.DoModal();
+
+	HsfcPmtDlg MyDytDlg;
 	MyDytDlg.DoModal();
+
 	return 0;
 
 	//LaunchPmtDialog();

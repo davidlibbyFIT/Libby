@@ -434,6 +434,57 @@ LRESULT DuityDlg::OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*
 	// First thing - check the draw stage. If it's the control's prepaint
 	// stage, then tell Windows we want messages for every item.
 
+	int aa=0;
+	switch (pNMCD->dwDrawStage)
+	{
+	case CDDS_PREERASE:
+		{
+			aa=1;
+			break;
+		}
+	case CDDS_POSTERASE:
+		{
+			aa=2;
+			break;
+		}
+	case CDDS_PREPAINT:
+		{
+			aa=3;
+			break;
+		}
+	case CDDS_ITEM | CDDS_PREPAINT:
+		{
+			aa=4;
+			break;
+		}
+	case CDDS_SUBITEM | CDDS_PREPAINT:
+		{
+			aa=5;
+			break;
+		}
+	case CDDS_SUBITEM | CDDS_POSTPAINT:
+		{
+			aa=6;
+			break;
+		}
+	case CDDS_ITEM | CDDS_POSTPAINT:
+		{
+			aa=7;
+			break;
+		}
+	case CDDS_POSTPAINT:
+		{
+			aa=8;
+			break;
+		}
+	default:
+		{
+			aa=9;
+			break;
+		}
+		break;
+	}
+
 	pNMCD->hdc;
 	pNMCD->rc.top;
 	CWindow SlideWindowHandle=GetDlgItem(pNMHDR->idFrom);
@@ -446,7 +497,7 @@ LRESULT DuityDlg::OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*
 
 	DrawSecadeLogScale(pNMCD->hdc, Rectangle.top + 13,Rectangle.bottom-14,Rectangle.left+18,4);
 
-	return 0;
+	return CDRF_DODEFAULT ;
 }
 
 
