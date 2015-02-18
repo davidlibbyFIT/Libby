@@ -166,9 +166,9 @@ LRESULT DuityDlg::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bH
 	//std::string Start_mL="1.0";
 	//m_EditBoxExample=GetDlgItem(IDC_EDIT_AMOUNT_ML);
 	//m_EditBoxExample.SetWindowTextW(CA2W(Start_mL.c_str()).m_szBuffer);
-	CWindow m_SlideWindowHandle=GetDlgItem(IDC_SLIDER1);
+	//CWindow m_SlideWindowHandle=GetDlgItem(IDC_SLIDER1);
 	RECT Rectangle;
-	m_SlideWindowHandle.GetClientRect(&Rectangle);
+	//m_SlideWindowHandle.GetClientRect(&Rectangle);
 
 	if(m_OnTop)
 	{
@@ -246,17 +246,27 @@ LRESULT DuityDlg::OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandle
 	//DrawVerticalLogScale(hdc,10,110,   100);
 	//DrawVerticalLogScale(hdc, 10,210,  200);
 	//DrawVerticalLogScale(hdc, 10,50 , 300);
+	/*
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 50,1);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 100,2);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 150,3);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 200,4);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 250,5);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 300,6);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 350,7);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 400,8);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 450,9);
+	DrawVerticalDecadeLogScale(hdc, 20,350 , 500,10);
+	*/
+	
+	
+	//DrawVerticalDecadeLogScale(hdc, 10,345 , 60,4);
 
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 50,1);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 100,2);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 150,3);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 200,4);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 250,5);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 300,6);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 350,7);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 400,8);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 450,9);
-	//DrawSecadeLogScale(hdc, 20,yLineEnd , 500,10);
+
+	DrawVerticalDecadeLogScale(hdc, 20,242 , 300,5);
+
+
+	DrawHoroztallLogScale(hdc,100,307,300);
 
 	EndPaint( &ps);
 
@@ -264,23 +274,26 @@ LRESULT DuityDlg::OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandle
 
 	return 0;
 }
-void DuityDlg::DrawSecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLineStart,int DecadeCount)
+void DuityDlg::DrawVerticalDecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLineStart,int DecadeCount)
 {
 	LPPOINT lpPoint(0);
 	int LineLength=yLineEnd-yLineStart;
 	int DecadeLength=(int)(LineLength/DecadeCount);
 	int LastLineEnd=yLineStart;
+	
+
+
 	for (int ct=1;ct<=DecadeCount;ct++)
 	{
 		DrawVerticalLogScale(hdc, LastLineEnd,LastLineEnd+DecadeLength,xLineStart);
 		
 		MoveToEx (hdc,xLineStart+DASH_WIDE_WIDTH,LastLineEnd,lpPoint);
-		LineTo (hdc,xLineStart,LastLineEnd);
+		LineTo (hdc,xLineStart-DASH_WIDE_WIDTH,LastLineEnd);
 		
 		RECT DrawArea;
 		DrawArea.top=LastLineEnd-7;
 		DrawArea.bottom=DrawArea.top+15;
-		DrawArea.left=xLineStart+DASH_WIDE_WIDTH+3;
+		DrawArea.left=xLineStart-DASH_WIDE_WIDTH/2+3;
 		DrawArea.right=DrawArea.left+15;
 
 		DrawDecadeText(hdc ,DrawArea,14,"10");
@@ -303,6 +316,25 @@ void DuityDlg::DrawSecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLi
 		LastLineEnd+=DecadeLength;
 
 	}
+
+	RECT DrawArea;
+	DrawArea.top=yLineEnd-10;
+	DrawArea.bottom=DrawArea.top+15;
+	DrawArea.left=xLineStart-DASH_WIDE_WIDTH/2+3;
+	DrawArea.right=DrawArea.left+15;
+
+	DrawDecadeText(hdc ,DrawArea,14,"10");
+
+	char str[20];
+	_itoa_s(0, str, 10);
+	std::string DecadeString= str;
+	RECT LittleDrawArea;
+	LittleDrawArea.bottom=DrawArea.top+2;
+	LittleDrawArea.left=DrawArea.right;
+	LittleDrawArea.top = LittleDrawArea.bottom - 8 ;
+	LittleDrawArea.right=LittleDrawArea.left + 8;
+	DrawDecadeText(hdc ,LittleDrawArea,10,DecadeString);
+
 }
 void DuityDlg::DrawDecadeText(HDC &hdc,RECT DrawArea,int size,std::string TextString)
 {
@@ -380,8 +412,8 @@ void DuityDlg::DrawVerticalLogScale(HDC &hdc, int yLineStart,int yLineEnd, int x
 		DecadeValue --;
 		if((yLineEnd-(int)YPos)-PreviousPix>1)
 		{
-			MoveToEx (hdc,xLineStart+DASH_STANDARD_WIDTH,yLineEnd-(int)YPos,lpPoint);
-			LineTo (hdc,xLineStart,yLineEnd-(int)YPos);
+			MoveToEx (hdc,xLineStart-DASH_STANDARD_WIDTH,yLineEnd-(int)YPos,lpPoint);
+			LineTo (hdc,xLineStart+DASH_STANDARD_WIDTH,yLineEnd-(int)YPos);
 			PreviousPix=yLineEnd-(int)YPos;
 			
 
@@ -391,6 +423,36 @@ void DuityDlg::DrawVerticalLogScale(HDC &hdc, int yLineStart,int yLineEnd, int x
 
 }
 
+void DuityDlg::DrawHoroztallLogScale(HDC &hdc, int xLineStart,int xLineEnd, int yLineStart)
+{
+	LPPOINT lpPoint(0);
+
+	int LineLength=xLineEnd-xLineStart;
+
+	//DrawCenterLine
+	MoveToEx (hdc,xLineStart,yLineStart,lpPoint);
+	LineTo(hdc,xLineEnd,yLineStart);
+
+	double DecadeValue = 10;//Decade Value Must Be 10
+	double CurLineLength=LineLength;
+	int PreviousPix=0;
+	while(DecadeValue >= 1)
+	{
+		double logI=log10((double) DecadeValue );
+		double XPos = LineLength * log10((double) DecadeValue );
+		DecadeValue --;
+		if((xLineEnd-(int)XPos)-PreviousPix>1)
+		{
+			MoveToEx (hdc,xLineEnd-(int)XPos,yLineStart+DASH_STANDARD_WIDTH,lpPoint);
+			LineTo (hdc,xLineEnd-(int)XPos,yLineStart);
+			PreviousPix=xLineEnd-(int)XPos;
+
+
+		}
+	}
+
+
+}
 
 
 LRESULT DuityDlg::OnBnClickedButton1(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -433,6 +495,7 @@ LRESULT DuityDlg::OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*
 
 	// First thing - check the draw stage. If it's the control's prepaint
 	// stage, then tell Windows we want messages for every item.
+	/*
 
 	int aa=0;
 	switch (pNMCD->dwDrawStage)
@@ -496,7 +559,7 @@ LRESULT DuityDlg::OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*
 	DeleteObject(brush);
 
 	DrawSecadeLogScale(pNMCD->hdc, Rectangle.top + 13,Rectangle.bottom-14,Rectangle.left+18,4);
-
+	*/
 	return CDRF_DODEFAULT ;
 }
 

@@ -1,5 +1,6 @@
-#ifndef DUITY_H
-#define DUITY_H
+#ifndef FEATURE_REG_DLG_H
+#define FEATURE_REG_DLG_H
+
 
 #include<TCHAR.H>
 #include <Windows.h>
@@ -8,17 +9,15 @@
 #include <atlbase.h>
 #include <atlwin.h>
 #include <string>
-#include <vector>
 
-
-class DuityDlg: public CDialogImpl<DuityDlg>
+class FeatureRegDlg: public CDialogImpl<FeatureRegDlg>
 {
 public:
-	DuityDlg(void);
-	~DuityDlg(void);
+	FeatureRegDlg(void);
+	~FeatureRegDlg(void);
 	
 	//After Re basing this you must set IDD = Resource ID of the dialog you want to generate.
-	enum { IDD = IDD_DIALOG_DUITY };
+	enum { IDD = IDD_DIALOG_FEATRUE_REG };
 	
 	//! Is the dialog Visible.
 	BOOL IsVisible();
@@ -40,39 +39,36 @@ public:
 	//! User Cancel variable.
 	bool m_UserCancel;
 
-	BEGIN_MSG_MAP(DuityDlg)
+	BEGIN_MSG_MAP(CAFAssistant0)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnBnClickedCancel)
 		COMMAND_HANDLER(IDOK, BN_CLICKED, OnBnClickedOk)
-		MESSAGE_HANDLER(WM_PAINT, OnPaint)
-		COMMAND_HANDLER(IDC_BUTTON1, BN_CLICKED, OnBnClickedButton1)
-		NOTIFY_HANDLER(IDC_SLIDER1, NM_CUSTOMDRAW, OnNMCustomdrawSlider1)
-		NOTIFY_HANDLER(IDC_SLIDER1, NM_RELEASEDCAPTURE, OnNMReleasedcaptureSlider1)
+		COMMAND_HANDLER(IDC_BUTTON_COPY_TO_CLIPBOARD, BN_CLICKED, OnBnClickedButtonCopyToClipboard)
+		COMMAND_HANDLER(IDC_BUTTON_SEND_EMAIL, BN_CLICKED, OnBnClickedButtonSendEmail)
+		COMMAND_HANDLER(IDC_BUTTONADD_FEATURE, BN_CLICKED, OnBnClickedButtonaddFeature)
+		MESSAGE_HANDLER(WM_DROPFILES, OnDrop)
 	END_MSG_MAP()
 
 
 private:
 
-	CWindow m_EditBoxExample;
+	CWindow m_EditBoxUniqueId;
+	CWindow m_EditBoxAddFeature;
+	CWindow m_ButtonCopyToClipboard;
+	CWindow m_ButtonSendMail;
+	CWindow m_ButtonAddFeature;
 
 
-public:
 	LRESULT OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-private:
+	LRESULT OnBnClickedButtonCopyToClipboard(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBnClickedButtonSendEmail(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBnClickedButtonaddFeature(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDrop(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	void toClipboard( const std::string &s);
+	std::string RetriveStdStringFromCWindow(CWindow &TempWindow);
 
-public:
-	LRESULT OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-
-	void DrawDecadeText(HDC &hdc,RECT DrawArea,int size,std::string TextString);
-	void DrawVerticalLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLineStart);
-	void DrawVerticalDecadeLogScale(HDC &hdc, int yLineStart,int yLineEnd, int xLineStart,int DecadeNumber);
-	void DuityDlg::DrawHoroztallLogScale(HDC &hdc, int xLineStart,int xLineEnd, int yLineStart);
-
-	LRESULT OnBnClickedButton1(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-	LRESULT OnNMCustomdrawSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/);
-	LRESULT OnNMReleasedcaptureSlider1(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/);
 };
 
-#endif // DUITY_H
+#endif // FEATURE_REG_DLG_H

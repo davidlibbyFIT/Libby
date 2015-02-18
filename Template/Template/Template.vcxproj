@@ -85,6 +85,7 @@
     <ClInclude Include="BackFlushDlg.h" />
     <ClInclude Include="DebugTimer.h" />
     <ClInclude Include="Duity.h" />
+    <ClInclude Include="FeatureRegDlg.h" />
     <ClInclude Include="FitBaseDlg.h" />
     <ClInclude Include="HsfcPMT.h" />
     <ClInclude Include="LaserStatusDialog.h" />
@@ -106,6 +107,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Duity.cpp" />
+    <ClCompile Include="FeatureRegDlg.cpp" />
     <ClCompile Include="FitBaseDlg.cpp" />
     <ClCompile Include="HsfcPMT.cpp" />
     <ClCompile Include="LaserStatusDialog.cpp" />

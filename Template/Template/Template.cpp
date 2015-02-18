@@ -15,6 +15,8 @@
 #include "Polygon.h"
 #include "Duity.h"
 #include "HsfcPMT.h"
+#include "FeatureRegDlg.h"
+
 
 //#include "DebugTimer.h"
 
@@ -296,8 +298,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	//DuityDlg MyDytDlg;
 	//MyDytDlg.DoModal();
 
-	HsfcPmtDlg MyDytDlg;
-	MyDytDlg.DoModal();
+	FeatureRegDlg gg;
+	gg.DoModal();
+
+	//HsfcPmtDlg MyDytDlg;
+	//MyDytDlg.DoModal();
 
 	return 0;
 
