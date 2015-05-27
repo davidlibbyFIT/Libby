@@ -87,6 +87,7 @@
     <ClInclude Include="Duity.h" />
     <ClInclude Include="FeatureRegDlg.h" />
     <ClInclude Include="FitBaseDlg.h" />
+    <ClInclude Include="HsfcConfig.h" />
     <ClInclude Include="HsfcPMT.h" />
     <ClInclude Include="LaserStatusDialog.h" />
     <ClInclude Include="PMTDlgCtrl.h" />
@@ -109,6 +110,7 @@
     <ClCompile Include="Duity.cpp" />
     <ClCompile Include="FeatureRegDlg.cpp" />
     <ClCompile Include="FitBaseDlg.cpp" />
+    <ClCompile Include="HsfcConfig.cpp" />
     <ClCompile Include="HsfcPMT.cpp" />
     <ClCompile Include="LaserStatusDialog.cpp" />
     <ClCompile Include="PMTDlgCtrl.cpp" />

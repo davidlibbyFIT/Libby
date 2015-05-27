@@ -16,6 +16,7 @@
 #include "Duity.h"
 #include "HsfcPMT.h"
 #include "FeatureRegDlg.h"
+#include "HsfcConfig.h"
 
 
 //#include "DebugTimer.h"
@@ -298,8 +299,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	//DuityDlg MyDytDlg;
 	//MyDytDlg.DoModal();
 
-	FeatureRegDlg gg;
-	gg.DoModal();
+	//FeatureRegDlg gg;
+	//gg.DoModal();
+	
+	HsfcConfig HSFCCfg;
+	HSFCCfg.DoModal();
 
 	//HsfcPmtDlg MyDytDlg;
 	//MyDytDlg.DoModal();
