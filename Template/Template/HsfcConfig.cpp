@@ -5,9 +5,6 @@
 #include "HsfcConfig.h"
 
 
-int yLineStartHC=10;
-int xLineStartHC=100;
-static int yLineEnd=400;
 
 static int DASH_STANDARD_WIDTH = 10;
 static int DASH_WIDE_WIDTH = 20;
@@ -243,7 +240,6 @@ LRESULT HsfcConfig::OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHand
 	HDC hdc; 
 	hdc = BeginPaint( &ps); 	
 
-	int LIneLength=yLineEnd-yLineStartHC;
 
 
 	DrawVerticalDecadeLogScale(hdc, 111,70 ,280,4);
