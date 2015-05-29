@@ -10,12 +10,14 @@
 
 static int DASH_STANDARD_WIDTH = 10;
 static int DASH_WIDE_WIDTH = 20;
-static double EDIT_SENSITIVITY_MAX = 4.0;
-static double EDIT_SENSITIVITY_MIN = 0.0;
+static double EDIT_THRESHOLD_MAX = 4.0;
+static double EDIT_THRESHOLD_MIN = 0.0;
 
-static int SLIDE_TOP_SCALE = (int)(EDIT_SENSITIVITY_MAX*1000.0);
-static int SLIDE_BOTTOM_SCALE = (int)(EDIT_SENSITIVITY_MIN*1000);
+static int THRESHOLD_SLIDE_TOP_SCALE = (int)(EDIT_THRESHOLD_MAX*1000.0);
+static int THRESHOLD_SLIDE_BOTTOM_SCALE = (int)(EDIT_THRESHOLD_MIN*1000);
 
+static double EDIT_GAIN_MAX = 9.99;
+static double EDIT_GAIN_MIN = 0.00;
 
 
 std::string HsfcPmtDlg::IntToString(int Value)
@@ -33,17 +35,11 @@ std::string HsfcPmtDlg::DoubleToString(double Value,int decPlaces/*=2*/)
 	// print it into sstream using maximum precision
 	s << std::fixed << std::setprecision(std::numeric_limits<double>::digits10) << Value;
 	std::string res = s.str();
-
 	// Now the res contains something like 1.234567899000000
 	// so truncate 9000000000 by hand
-
 	size_t dotIndex = res.find(".");
-
 	std::string final_res = res.substr(0, dotIndex + decPlaces+1);
-
 	return final_res;
-
-
 }
 
 
@@ -209,8 +205,8 @@ LRESULT HsfcPmtDlg::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	m_SliderCh2Sensitivity=GetDlgItem(IDC_SLIDER_CH2);
 
 
-	SendMessage(m_SliderCh1Sensitivity, TBM_SETRANGE, 0, (LPARAM)MAKELONG(SLIDE_BOTTOM_SCALE, SLIDE_TOP_SCALE));
-	SendMessage(m_SliderCh2Sensitivity, TBM_SETRANGE, 0, (LPARAM)MAKELONG(SLIDE_BOTTOM_SCALE, SLIDE_TOP_SCALE));
+	SendMessage(m_SliderCh1Sensitivity, TBM_SETRANGE, 0, (LPARAM)MAKELONG(THRESHOLD_SLIDE_TOP_SCALE,THRESHOLD_SLIDE_BOTTOM_SCALE));
+	SendMessage(m_SliderCh2Sensitivity, TBM_SETRANGE, 0, (LPARAM)MAKELONG(THRESHOLD_SLIDE_BOTTOM_SCALE, THRESHOLD_SLIDE_TOP_SCALE));
 
 	if(m_OnTop)
 	{
@@ -517,7 +513,7 @@ double HsfcPmtDlg::GetSliderPos(CWindow &CurWindow)
 }
 void HsfcPmtDlg::SetSliderPos(CWindow &CurWindow,int NewPos)
 {
-	if(NewPos > SLIDE_TOP_SCALE || NewPos < SLIDE_BOTTOM_SCALE)
+	if(NewPos > THRESHOLD_SLIDE_TOP_SCALE || NewPos < THRESHOLD_SLIDE_BOTTOM_SCALE)
 		return;
 
 	SendMessageW(CurWindow,TBM_SETPOS,true,NewPos);
@@ -529,7 +525,7 @@ LRESULT HsfcPmtDlg::OnNMReleasedcaptureSlider(int idCtrl, LPNMHDR pNMHDR, BOOL& 
 	CWindow SlideWindowHandle=GetDlgItem(pNMHDR->idFrom);
 	RECT Rectangle;
 	SlideWindowHandle.GetClientRect(&Rectangle);
-	int CtrlPos= (int)(SLIDE_TOP_SCALE - GetSliderPos(SlideWindowHandle));
+	int CtrlPos= (int)(THRESHOLD_SLIDE_TOP_SCALE - GetSliderPos(SlideWindowHandle));
 	double dblCtrlPos=(double)CtrlPos/1000.0;
 	if(CtrlPos==0)
 		dblCtrlPos=0.0;
@@ -570,8 +566,8 @@ void HsfcPmtDlg::RedrawControls()
 	//SetEditWindowValue(m_EditCh1Sensitivity,dblCtrlPos);
 	//m_EditCh1Sensitivity.SetWindowTextW(CA2W(DoubleToString(dblCtrlPos).c_str()).m_szBuffer);
 
-	int SliderPosCh1=SLIDE_TOP_SCALE-(int)(m_Ch1Sensitivity*1000.0);
-	int SliderPosCh2=SLIDE_TOP_SCALE-(int)(m_Ch2Sensitivity*1000.0);
+	int SliderPosCh1=THRESHOLD_SLIDE_TOP_SCALE-(int)(m_Ch1Sensitivity*1000.0);
+	int SliderPosCh2=THRESHOLD_SLIDE_TOP_SCALE-(int)(m_Ch2Sensitivity*1000.0);
 
 
 	SetSliderPos(m_SliderCh1Sensitivity,SliderPosCh1);
@@ -607,11 +603,11 @@ LRESULT HsfcPmtDlg::OnEnKillfocusEditSensitivity(WORD wNotifyCode, WORD wID, HWN
 	CWindow EditWindowHandle=GetDlgItem(wID);
 
 	double EditWIndowDblValue=GetEditWindowValue(EditWindowHandle);
-	if(EditWIndowDblValue>EDIT_SENSITIVITY_MAX)
-		EditWIndowDblValue=EDIT_SENSITIVITY_MAX;
+	if(EditWIndowDblValue>EDIT_THRESHOLD_MAX)
+		EditWIndowDblValue=EDIT_THRESHOLD_MAX;
 
-	if(EditWIndowDblValue<EDIT_SENSITIVITY_MIN)
-		EditWIndowDblValue=EDIT_SENSITIVITY_MIN;
+	if(EditWIndowDblValue<EDIT_THRESHOLD_MIN)
+		EditWIndowDblValue=EDIT_THRESHOLD_MIN;
 
 
 

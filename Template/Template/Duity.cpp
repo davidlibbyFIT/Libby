@@ -167,7 +167,7 @@ LRESULT DuityDlg::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bH
 	//m_EditBoxExample=GetDlgItem(IDC_EDIT_AMOUNT_ML);
 	//m_EditBoxExample.SetWindowTextW(CA2W(Start_mL.c_str()).m_szBuffer);
 	//CWindow m_SlideWindowHandle=GetDlgItem(IDC_SLIDER1);
-	RECT Rectangle;
+	//RECT Rectangle;
 	//m_SlideWindowHandle.GetClientRect(&Rectangle);
 
 	if(m_OnTop)
