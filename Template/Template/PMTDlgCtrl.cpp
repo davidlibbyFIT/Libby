@@ -532,7 +532,7 @@ LRESULT PmtDlgCtrl::OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWn
 
 
 
-LRESULT PmtDlgCtrl::OnBnClickedAppily(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT PmtDlgCtrl::OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	// TODO: Add your control notification handler code here
 	m_Dirty=false;

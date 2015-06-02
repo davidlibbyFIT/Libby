@@ -16,16 +16,18 @@
 class HsfcConfig: public CDialogImpl<HsfcConfig>
 {
 
+
+public:
+
 	typedef enum HSFC_ConfigReturn
 	{
-		 HSFC_RET_OK
+		HSFC_RET_OK
 		, HSFC_RET_CANCEL
-		, HSFC_RET_APPILY
+		, HSFC_RET_APPLY
 		, HSFC_RET_NULL
 	};
 
-public:
-	HsfcConfig(void);
+	HsfcConfig(void/* constructor will need to pass in a pointer to the context file */);
 	~HsfcConfig(void);
 
 	//After Re basing this you must set IDD = Resource ID of the dialog you want to generate.
@@ -70,7 +72,7 @@ public:
 		COMMAND_HANDLER(IDC_CHECK_CH1_TRIGG, BN_CLICKED, OnBnClickedCheckCh1Trigg)
 		COMMAND_HANDLER(IDC_CHECK_CH2_TRIGG, BN_CLICKED, OnBnClickedCheckCh2Trigg)
 		COMMAND_HANDLER(IDC_CHECK_SMALL_PART, BN_CLICKED, OnBnClickedCheckSmallPart)
-		COMMAND_HANDLER(ID_APPILY, BN_CLICKED, OnBnClickedApply)
+		COMMAND_HANDLER(ID_APPLY_HSFC, BN_CLICKED, OnBnClickedApply)
 		MESSAGE_HANDLER(WM_HSCROLL, OnHScroll)
 		COMMAND_HANDLER(ID_RESTORE, BN_CLICKED, OnBnClickedRestore)
 	END_MSG_MAP()
@@ -156,6 +158,8 @@ public:
 	double getCh1Max()		{return m_Max_Ch1;};
 	double getCh2Min()		{return m_Min_Ch2;};
 	double getCh2Max()		{return m_Max_Ch2;};
+	HSFC_ConfigReturn getExitCode(){return m_Ret;};
+
 
 	//! Returns the Ret Type.
 	HSFC_ConfigReturn getRet(){return m_Ret;};

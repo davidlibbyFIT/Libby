@@ -303,13 +303,31 @@ int _tmain(int argc, _TCHAR* argv[])
 	//gg.DoModal();
 	
 	HsfcConfig HSFCCfg;
-	HSFCCfg.setCh1Max(5.55);
-	HSFCCfg.setCh1Min(4.55);
+	int retdls = HSFCCfg.DoModal();
+	switch (HSFCCfg.getExitCode())
+	{
+	case HsfcConfig::HSFC_RET_APPLY:
+		{
+			int aa=1;
+			break;	
+		}
+	case HsfcConfig::HSFC_RET_OK:
+		{
+			int aa=1;
+			break;	
+		}
+	case HsfcConfig::HSFC_RET_CANCEL:
+		{
+			int aa=1;
+			break;	
+		}
+	case HsfcConfig::HSFC_RET_NULL:
+		{
+			int aa=1;
+			break;	
+		}
 
-	HSFCCfg.setCh2Max(4.55);
-	HSFCCfg.setCh2Min(3.55);
-
-	HSFCCfg.DoModal();
+	}
 
 	//HsfcPmtDlg MyDytDlg;
 	//MyDytDlg.DoModal();

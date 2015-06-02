@@ -100,7 +100,7 @@ LRESULT HsfcConfig::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	m_EditMinCh2=GetDlgItem(IDC_EDIT_MIN_CH2);
 	m_EditMaxCh2=GetDlgItem(IDC_EDIT_MAX_CH2);
 
-	m_ButtonApply=GetDlgItem(ID_APPILY);
+	m_ButtonApply=GetDlgItem(ID_APPLY_HSFC);
 
 	m_SliderMinCh1=GetDlgItem(IDC_SLIDER_MIN_CH1);
 	m_SliderMaxCh1=GetDlgItem(IDC_SLIDER_MAX_CH1);
@@ -281,9 +281,13 @@ void HsfcConfig::Close()
 LRESULT HsfcConfig::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 
-	int response = MessageBoxW(L"Are you sure you want to exit without saving changes?",L"Unsaved changes",MB_YESNO|MB_ICONWARNING);
-	if(response!=IDYES)
-		return 0;
+	if(m_IsDirty)
+	{
+		int response = MessageBoxW(L"Are you sure you want to exit without saving changes?",L"Unsaved changes",MB_YESNO|MB_ICONWARNING);
+		if(response!=IDYES)
+			return 0;
+
+	}
 	
 	if (m_bModal)
 		EndDialog(IDCANCEL);
@@ -314,12 +318,16 @@ LRESULT HsfcConfig::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 */
 LRESULT HsfcConfig::OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	
+	saveToContext();
+
+	m_Ret = HSFC_RET_OK;
+
 	if (m_bModal)
 		EndDialog(IDCANCEL);
 	else
 		::DestroyWindow(this->m_hWnd);
 
-	m_Ret = HSFC_RET_OK;
 	return HSFC_RET_OK;
 }
 
@@ -1288,7 +1296,7 @@ LRESULT HsfcConfig::OnBnClickedCheckSmallPart(WORD /*wNotifyCode*/, WORD /*wID*/
 LRESULT HsfcConfig::OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	// TODO: Add your control notification handler code here
-	m_Ret=HSFC_RET_APPILY;
+	m_Ret=HSFC_RET_APPLY;
 	saveToContext();
 	m_IsDirty=false;
 	RedrawControls();
@@ -1355,6 +1363,16 @@ LRESULT HsfcConfig::OnHScroll(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 }
 
 
+/**
+* FUNCTION setCh1Enable
+*
+* @brief Set state of enable Chanel one
+*
+* @author DAVID.LIBBY
+* @date 6/2/2015 2:57:44 PM
+*
+* @param newValue 
+*/
 void HsfcConfig::setCh1Enable(bool newValue)
 {
 	m_CheckEnableCh1=newValue;
@@ -1362,6 +1380,16 @@ void HsfcConfig::setCh1Enable(bool newValue)
 	if(IsVisible())
 		RedrawControls();
 }
+/**
+* FUNCTION setCh2Enable
+*
+* @brief Set state of enable Chanel two
+*
+* @author DAVID.LIBBY
+* @date 6/2/2015 2:58:02 PM
+*
+* @param newValue 
+*/
 void HsfcConfig::setCh2Enable(bool newValue)
 {
 	m_CheckEnableCh2=newValue;
@@ -1370,6 +1398,16 @@ void HsfcConfig::setCh2Enable(bool newValue)
 		RedrawControls();
 
 }
+/**
+* FUNCTION setGain
+*
+* @brief Set Gain
+*
+* @author DAVID.LIBBY
+* @date 6/2/2015 2:58:18 PM
+*
+* @param NewGain 
+*/
 void HsfcConfig::setGain(int NewGain)
 {
 	m_Gain=NewGain;
@@ -1378,6 +1416,16 @@ void HsfcConfig::setGain(int NewGain)
 		RedrawControls();
 
 }
+/**
+* FUNCTION setSmallParticle
+*
+* @brief On if the small particle "Filter" is enabled.
+*
+* @author DAVID.LIBBY
+* @date 6/2/2015 2:58:27 PM
+*
+* @param newValue 
+*/
 void HsfcConfig::setSmallParticle(bool newValue)
 {
 	m_CheckSmallParticle=newValue;
@@ -1387,6 +1435,21 @@ void HsfcConfig::setSmallParticle(bool newValue)
 
 }
 
+/**
+* FUNCTION OnBnClickedRestore
+*
+* @brief Restore to the last saved state not used for now.
+*
+* @author DAVID.LIBBY
+* @date 6/2/2015 2:59:07 PM
+*
+* @param  
+* @param  
+* @param  
+* @param  
+*
+* @return LRESULT 
+*/
 LRESULT HsfcConfig::OnBnClickedRestore(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	// TODO: Add your control notification handler code here
@@ -1408,6 +1471,10 @@ LRESULT HsfcConfig::OnBnClickedRestore(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 */
 void HsfcConfig::saveToContext()
 {
+	//Save Crap to context
+	
+	m_IsDirty=false;
+	RedrawControls();
 }
 /**
 * FUNCTION readFromContext

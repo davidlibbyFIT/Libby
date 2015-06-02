@@ -66,7 +66,7 @@ public:
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnBnClickedCancel)
 		COMMAND_HANDLER(IDOK, BN_CLICKED, OnBnClickedOk)
-		COMMAND_HANDLER(BUTTON_APPLY, BN_CLICKED, OnBnClickedAppily)
+		COMMAND_HANDLER(BUTTON_APPLY, BN_CLICKED, OnBnClickedApply)
 		COMMAND_HANDLER(IDC_CHECK_CH1_TRIGGER, BN_CLICKED, OnBnClickedCheckCh1Trigger)
 		COMMAND_HANDLER(IDC_CHECK_CH2_TRIGGER, BN_CLICKED, OnBnClickedCheckCh2Trigger)
 		COMMAND_HANDLER(IDC_EDIT_CH1_INT_MIN, EN_CHANGE, OnEnChangeEditCh1IntMin)
@@ -193,7 +193,7 @@ public:
 	LRESULT OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	LRESULT OnBnClickedAppily(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnBnClickedCheckCh1Trigger(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedCheckCh2Trigger(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
