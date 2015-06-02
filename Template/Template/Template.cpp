@@ -303,11 +303,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	//gg.DoModal();
 	
 	HsfcConfig HSFCCfg;
-	HSFCCfg.SetCh1Max(5.55);
-	HSFCCfg.SetCh1Min(4.55);
+	HSFCCfg.setCh1Max(5.55);
+	HSFCCfg.setCh1Min(4.55);
 
-	HSFCCfg.SetCh2Max(4.55);
-	HSFCCfg.SetCh2Min(3.55);
+	HSFCCfg.setCh2Max(4.55);
+	HSFCCfg.setCh2Min(3.55);
 
 	HSFCCfg.DoModal();
 
