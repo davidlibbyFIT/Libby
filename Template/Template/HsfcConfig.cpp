@@ -31,16 +31,21 @@ static int SLIDE_THRESHOLD_SCALE_SIZE = SLIDE_THRESHOLD_TOP_SCALE - SLIDE_THRESH
 static int SLIDE_THRESHOLD_PAGE_INC = 50;
 static int SLIDE_THRESHOLD_LINE_INC = 2;
 
-static int SLIDE_GAIN_TOP_SCALE = 1024 ;
+static int SLIDE_GAIN_TOP_SCALE = 3 ;
 static int SLIDE_GAIN_BOTTOM_SCALE = 0;
-static int SLIDE_GAIN_MID_SCALE = SLIDE_GAIN_BOTTOM_SCALE + (SLIDE_GAIN_TOP_SCALE-SLIDE_GAIN_BOTTOM_SCALE)/2;
+static int SLIDE_GAIN_MID_SCALE = 0;
+
+int static GAIN_0 = 0;
+int static GAIN_1 = 342;
+int static GAIN_2 = 682;
+int static GAIN_3 = 1024;
 
 static int EDIT_WIDTH_MAX = 48;
 static int EDIT_WIDTH_MIN = 4095;
 static int EDIT_WIDTH_DEFAULT = 3200;
 
-static int SLIDE_GAIN_PAGE_INC = 50;
-static int SLIDE_GAIN_LINE_INC = 2;
+static int SLIDE_GAIN_PAGE_INC = 1;
+static int SLIDE_GAIN_LINE_INC = 1;
 
 /**
 * CLASS HsfcConfig
@@ -1219,7 +1224,7 @@ LRESULT HsfcConfig::OnEnKillfocusEditThreshold(WORD wNotifyCode, WORD wID, HWND 
 /**
 * FUNCTION RedrawControls
 *
-* @brief Redraw all controlls on the screen.
+* @brief Redraw all controls on the screen.
 *
 * @author DAVID.LIBBY
 * @date 6/1/2015 9:53:56 AM
@@ -1251,7 +1256,7 @@ void HsfcConfig::RedrawControls(bool refreshEdit/*=true*/)
 	SendMessage(m_CheckCh2, BM_SETCHECK,m_CheckEnableCh2, 0);
 	SendMessage(m_CheckSmallPartBox, BM_SETCHECK,m_CheckSmallParticle, 0);
 
-	SendMessageW(m_SliderGain,TBM_SETPOS,true, m_Gain);
+	setGainSliderPos(m_Gain);
 
 	SetThresholdSliderPos(m_SliderMinCh1,m_Min_Ch1);
 	SetThresholdSliderPos(m_SliderMaxCh1,m_Max_Ch1);
@@ -1261,6 +1266,70 @@ void HsfcConfig::RedrawControls(bool refreshEdit/*=true*/)
 
 }
 
+
+/**
+* FUNCTION getGainSliderPos
+*
+* @brief Returns a number for one of 4 positions 0-1024
+*
+* @author DAVID.LIBBY
+* @date 6/3/2015 9:25:31 AM
+*
+*
+* @return int 
+*/
+int HsfcConfig::getGainSliderPos()
+{
+	int newPos = SendMessageW(m_SliderGain,TBM_GETPOS,0,0);
+	int Gain=m_Gain;
+	switch (newPos)
+	{
+	case 0:
+		Gain = GAIN_0;
+		break;
+	case 1:
+		Gain = GAIN_1;
+		break;
+	case 2:
+		Gain = GAIN_2;
+		break;
+	case 3:
+		Gain = GAIN_3;
+		break;
+	}
+
+	return Gain;
+
+}
+/**
+* FUNCTION setGainSliderPos
+*
+* @brief Gets Sets the slider pos to one of 4 positions given a Gain Number.
+*
+* @author DAVID.LIBBY
+* @date 6/3/2015 9:24:52 AM
+*
+* @param newGain 
+*/
+void HsfcConfig::setGainSliderPos(int newGain)
+{
+	int pos=GAIN_0;
+	if( newGain <=GAIN_0 )
+	{
+		pos=0;
+	}else if(newGain>=GAIN_1 && newGain <GAIN_2 )	
+	{
+		pos=1;
+	}else if(newGain>=GAIN_2 && newGain <GAIN_3 )
+	{
+		pos=2;
+	}else if(newGain>=GAIN_3  )
+	{
+		pos=3;
+	}
+
+	SendMessageW(m_SliderGain,TBM_SETPOS,true, pos);;
+}
 
 LRESULT HsfcConfig::OnBnClickedCheckCh1Trigg(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
@@ -1339,10 +1408,11 @@ LRESULT HsfcConfig::OnHScroll(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				{
 				case IDC_SLIDER_GAIN:
 					{
-						if(m_Gain!=nPos)
+						int newGain=getGainSliderPos();
+						if(m_Gain!=newGain)
 						{
-							m_IsDirty=true;
-							m_Gain=nPos;
+							m_IsDirty=true;							
+							m_Gain=newGain;
 							RedrawControls();
 						}
 						break;
@@ -1416,6 +1486,11 @@ void HsfcConfig::setGain(int NewGain)
 		RedrawControls();
 
 }
+int HsfcConfig::getGain()			
+{
+	return m_Gain;
+};
+
 /**
 * FUNCTION setSmallParticle
 *

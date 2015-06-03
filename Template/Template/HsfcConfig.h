@@ -131,6 +131,9 @@ private:
 	void SetEditWindowValue(CWindow &CurWindow,double NewValue);
 	void SetEditWindowValue(CWindow &CurWindow,int NewValue);
 	double GetEditWindowValue(CWindow &CurWindow);
+	int HsfcConfig::getGainSliderPos();
+	void HsfcConfig::setGainSliderPos(int newPos);
+
 
 	void RedrawControls(bool refreshEdit=true);
 
@@ -151,8 +154,8 @@ public:
 
 	bool getCh1Enable()		{return m_CheckEnableCh1;};
 	bool getCh2Enable()		{return m_CheckEnableCh2;};
-	int getGain()			{return m_Gain;};
 	bool getSmallParticle()	{return m_CheckSmallParticle;};
+	int getGain()			;
 
 	double getCh1Min()		{return m_Min_Ch1;};
 	double getCh1Max()		{return m_Max_Ch1;};
