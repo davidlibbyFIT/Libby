@@ -87,6 +87,7 @@
     <ClInclude Include="Duity.h" />
     <ClInclude Include="FeatureRegDlg.h" />
     <ClInclude Include="FitBaseDlg.h" />
+    <ClInclude Include="gogo.h" />
     <ClInclude Include="HsfcConfig.h" />
     <ClInclude Include="HsfcPMT.h" />
     <ClInclude Include="LaserStatusDialog.h" />
@@ -110,6 +111,9 @@
     <ClCompile Include="Duity.cpp" />
     <ClCompile Include="FeatureRegDlg.cpp" />
     <ClCompile Include="FitBaseDlg.cpp" />
+    <ClCompile Include="gogo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="HsfcConfig.cpp" />
     <ClCompile Include="HsfcPMT.cpp" />
     <ClCompile Include="LaserStatusDialog.cpp" />

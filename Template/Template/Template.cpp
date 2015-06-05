@@ -17,6 +17,7 @@
 #include "HsfcPMT.h"
 #include "FeatureRegDlg.h"
 #include "HsfcConfig.h"
+#include "GoGo.h"
 
 
 //#include "DebugTimer.h"
@@ -285,7 +286,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 
-	HWND hDlg;
+	HWND hDlg, hDlg2;
 	MSG msg;
 	BOOL ret;
 
@@ -302,6 +303,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	//FeatureRegDlg gg;
 	//gg.DoModal();
 	
+	hDlg2 = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG_HSFC_FLOUR), 0, HSFCControlProc, 0);
+
+	/*
 	HsfcConfig HSFCCfg;
 	int retdls = HSFCCfg.DoModal();
 	switch (HSFCCfg.getExitCode())
@@ -327,18 +331,17 @@ int _tmain(int argc, _TCHAR* argv[])
 			break;	
 		}
 
-	}
+	}*/
 
 	//HsfcPmtDlg MyDytDlg;
 	//MyDytDlg.DoModal();
 
-	return 0;
 
 	//LaunchPmtDialog();
 	//return 0;
 
 
-	ShowWindow(hDlg, SW_SHOW);
+	ShowWindow(hDlg2, SW_SHOW);
 
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) {
 		if(ret == -1)
