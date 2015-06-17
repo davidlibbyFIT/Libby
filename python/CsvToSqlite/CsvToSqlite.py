@@ -4,12 +4,10 @@ import csv
 import sqlite3
 
 DBName = raw_input("Please enter SqLteDb Name: ")
-print "Your Db = ", DBName
+#print "Your Db = ", DBName
 
 DirToSearch = raw_input("Please enter Directory to search: ")
-print "your Dir", DirToSearch
-
-sys.exit()
+#print "your Dir", DirToSearch
 
 conn = sqlite3.connect(DBName)
 
