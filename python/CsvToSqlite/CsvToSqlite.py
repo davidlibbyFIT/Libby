@@ -116,7 +116,7 @@ for filename in fileList:
                 resetcount +=1
                 if resetcount > 100:
                     resetcount=0
-                    print "Commit"
+                    #print "Commit"
                     conn.commit()
                     
                 #print startsql
