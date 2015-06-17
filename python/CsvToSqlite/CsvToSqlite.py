@@ -3,9 +3,10 @@ import fnmatch
 import csv
 import sqlite3
 
-conn = sqlite3.connect('yes2.db')
+conn = sqlite3.connect('C:\Users\david.libby\Desktop\Python\Harris.db')
 
-conn.execute('''CREATE TABLE IF NOT EXISTS data (filename text)''')
+##conn.execute('''CREATE TABLE IF NOT EXISTS data (filename text)''')
+conn.execute('''CREATE TABLE IF NOT EXISTS data ("Area (ABD)" REAL, "Area (Filled)" REAL, "Aspect Ratio" REAL, "Average Blue" REAL, "Average Green" REAL, "Average Red" REAL, "BinHigh" INTEGER, "BinLow" INTEGER, "Biovolume (Cylinder)" REAL, "Biovolume (P. Spheroid)" REAL, "Biovolume (Sphere)" REAL, "Calibration Factor" REAL, "Calibration Image" INTEGER, "Camera" INTEGER, "Capture X" INTEGER, "Capture Y" INTEGER, "Ch1 Area" REAL, "Ch1 Peak Area" REAL, "Ch1 Peak" REAL, "Ch1 Width" REAL, "Ch2 Area" REAL, "Ch2 Peak Area" REAL, "Ch2 Peak" REAL, "Ch2 Width" REAL, "Ch2/Ch1 Ratio" REAL, "Circle Fit" REAL, "Circularity (Hu)" REAL, "Circularity" REAL, "Class" TEXT, "Compactness" REAL, "Convex Perimeter" REAL, "Convexity" REAL, "Count" TEXT, "CumulativeFrequency" INTEGER, "CumulativePercentage" REAL, "Date" DATE, "Diameter (ABD)" REAL, "Diameter (ESD)" REAL, "Edge Gradient" REAL, "Elapsed Time" REAL, "Elongation" REAL, "Feret Angle Max" REAL, "Feret Angle Min"  REAL, "Fiber Curl" REAL, "Fiber Straightness" REAL, "Filename" text, "Filter Score" TEXT, "Frequency" INTEGER, "Geodesic Aspect Ratio" REAL, "Geodesic Length" REAL, "Geodesic Thickness" REAL, "Image File" TEXT, "Image Height" INTEGER, "Image Width" INTEGER, "Image X" INTEGER, "Image Y" INTEGER, "Intensity" REAL, "Length" REAL, "List File" TEXT, "List Name" TEXT, "Particle ID" INTEGER, "Particles Per Chain" TEXT, "Perimeter" REAL, "Ratio Blue/Green" REAL, "Ratio Red/Blue" REAL, "Ratio Red/Green" REAL, "Roughness" REAL, "Scatter Area" REAL, "Scatter Peak Area" REAL, "Scatter Peak" REAL, "Scatter Width" REAL, "Sigma Intensity" REAL, "Source Image" INTEGER, "Sphere Complement" REAL, "Sphere Count" REAL, "Sphere Unknown" REAL, "Sphere Volume" REAL, "Sum Intensity" INTEGER, "Symmetry" REAL, "Time" TEXT, "Timestamp" TEXT, "Transparency" REAL, "Volume (ABD)" REAL, "Volume (ESD)" REAL, "Width" REAL );''')
 
 # Save (commit) the changes
 conn.commit()
@@ -18,24 +19,14 @@ def find_files(directory, pattern):
                 filename = os.path.join(root, basename)
                 yield filename
 
-
-
-try:
-    print 1
-    conn.execute('''ALTER TABLE data ADD COLUMN filename TEXT;''')
-    print 1
-    conn.execute('CREATE TABLE data ("Area (ABD)" REAL, "Aspect Ratio" REAL, "Average Blue" REAL, "Average Green" REAL, "Average Red" REAL, "BinHigh" INTEGER, "BinLow" INTEGER, "Calibration Factor" REAL, "Calibration Image" INTEGER, "Camera" INTEGER, "Capture X" INTEGER, "Capture Y" INTEGER, "Ch1 Area" REAL, "Ch1 Peak Area" REAL, "Ch1 Peak" REAL, "Ch1 Width" REAL, "Ch2 Area" REAL, "Ch2 Peak Area" REAL, "Ch2 Peak" REAL, "Ch2 Width" REAL, "Ch2/Ch1 Ratio" REAL, "Circle Fit" REAL, "Circularity (Hu)" REAL, "Class" TEXT, "Compactness" REAL, "Convex Perimeter" REAL, "Convexity" REAL, "Count" TEXT, "CumulativeFrequency" INTEGER, "CumulativePercentage" REAL, "Date" DATE, "Diameter (ABD)" REAL, "Diameter (ESD)" REAL, "Edge Gradient" REAL, "Elongation" REAL, "Feret Angle Max" REAL, "Feret Angle Min"  REAL, "Fiber Curl" REAL, "Fiber Straightness" REAL, "Filename" text, "Filter Score" TEXT, "Frequency" INTEGER, "Geodesic Aspect Ratio" REAL, "Geodesic Length" REAL, "Geodesic Thickness" REAL, "Image File" TEXT, "Image Height" INTEGER, "Image Width" INTEGER, "Image X" INTEGER, "Image Y" INTEGER, "Intensity" REAL, "Length" REAL, "List File" TEXT, "List Name" TEXT, "Particle ID" INTEGER, "Particles Per Chain" TEXT, "Perimeter" REAL, "Ratio Blue/Green" REAL, "Ratio Red/Blue" REAL, "Ratio Red/Green" REAL, "Roughness" REAL, "Scatter Area" REAL, "Scatter Peak Area" REAL, "Scatter Peak" REAL, "Scatter Width" REAL, "Sigma Intensity" REAL, "Source Image" INTEGER, "Sum Intensity" INTEGER, "Symmetry" REAL, "Time" TEXT, "Timestamp" TEXT, "Transparency" REAL, "Volume (ABD)" REAL, "Volume (ESD)" REAL, "Width" REAL);')
-    print 2
-except:
-    A=1
-    conn.close()
-    stop()
-conn.close()
-exit()
 badcount = 0
 Recordcount =0;
 filecount = 0;
-for filename in find_files('C:\Users\david.libby\Desktop\sample Data', '*.csv'):
+for filename in find_files('C:\Users\david.libby\Desktop\Python', 'data_export.csv'):
+    if "_summary.csv" in filename:
+        print "Excluding " + filename        
+        continue
+    
     with open( filename, "rb" ) as theFile:
         linecount=0
         filecount +=1
@@ -84,7 +75,10 @@ for filename in find_files('C:\Users\david.libby\Desktop\sample Data', '*.csv'):
                 Recordcount +=1
                 print "Filecount = " ,filecount,"Rec in file= ",linecount,"Overall Record Count=", Recordcount;
                 conn.execute(startsql)
+                #conn.commit()
                 #print startsql
+                #conn.close()
+                #exit()
             except:
                 print
                 print
@@ -105,6 +99,11 @@ for filename in find_files('C:\Users\david.libby\Desktop\sample Data', '*.csv'):
 
         conn.commit()
              
+
+print "Compacting Database"
+conn.execute("VACUUM")
+print "Done Compacting Database"
+
         #print 'Found C source:', filename
 conn.close()
 print "Bad COunt = " , badcount
