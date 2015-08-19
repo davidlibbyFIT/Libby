@@ -33,6 +33,21 @@ Window {
                     color: "#ffffff";
                 }
             }
+            MouseArea
+            {
+                anchors.fill: parent
+                onClicked:
+                {
+                    console.log("hello");
+                    color = "blue"
+                }
+                onPositionChanged:
+                {
+                   console.log(mouse.x+" "+mouse.y)
+
+                }
+
+            }
 
         }
     }
