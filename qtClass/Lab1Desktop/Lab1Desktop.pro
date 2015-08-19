@@ -16,13 +16,15 @@ SOURCES += main.cpp\
     tableview.cpp \
     label.cpp \
     customview.cpp \
-    customwidget.cpp
+    customwidget.cpp \
+    picalculator.cpp
 
 HEADERS  += mainwindow.h \
     tableview.h \
     label.h \
     customview.h \
-    customwidget.h
+    customwidget.h \
+    picalculator.h
 
 FORMS    += mainwindow.ui
 

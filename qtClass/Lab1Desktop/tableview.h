@@ -6,6 +6,7 @@
 
 class Label;
 class QStandardItemModel;
+class QResizeEvent;
 
 class TableView : public QTableView
 {
@@ -19,6 +20,10 @@ public:
 private:
     QStandardItemModel *m_model;
     Label *m_pLabel;
+protected:
+
+    void resizeEvent(QResizeEvent *event)Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event)Q_DECL_OVERRIDE;
 
 public slots:
 

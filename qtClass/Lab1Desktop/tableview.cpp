@@ -3,11 +3,15 @@
 #include <QDebug>
 #include "label.h"
 #include <QPixmap>
+#include <QResizeEvent>
 
 TableView::TableView(QWidget *parent):
     m_pLabel(nullptr)
 
 {
+    //int deviceType = parent->devType();
+    //qDebug() << "Device Type = " << deviceType;
+
     QList <QStringList> carData;
     carData.append(QStringList( { { "Toyota" }, { "Avensis" } } ));
     carData.append(QStringList( { { "Toyota" }, { "Land-Cruiser" } } ));
@@ -50,6 +54,25 @@ TableView::TableView(QWidget *parent):
 TableView::~TableView()
 {
     delete m_pLabel;
+}
+
+void TableView::resizeEvent(QResizeEvent *event)
+{
+    int colct=model()->columnCount();
+    //int columnWidth=22;
+    event->size();
+    int columnWidth(event->size().width()/colct);
+    for (int ct=0;ct<colct;ct++)
+    {
+        setColumnWidth(ct,columnWidth);
+    }
+
+    QTableView::resizeEvent(event);
+}
+
+void TableView::mousePressEvent(QMouseEvent *event)
+{
+     QTableView::mousePressEvent(event);
 }
 void TableView::clicked(const QModelIndex & index)
 {

@@ -6,6 +6,8 @@
 class QStandardItemModel;
 class TableView;
 class CustomView;
+class QThread;
+class PiCalculator;
 
 namespace Ui {
 class MainWindow;
@@ -19,6 +21,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+public slots:
+    void handleResults();
+    void PieCalcFinished();
 private slots:
     void on_pushButtonCars_clicked();
 
@@ -35,6 +41,8 @@ private:
     QStandardItemModel *m_model;
     TableView *m_TableView;
     CustomView *m_pCustomView;
+    PiCalculator *m_pPiCalculator;
+    QThread *m_pPieThread;
 };
 
 #endif // MAINWINDOW_H
