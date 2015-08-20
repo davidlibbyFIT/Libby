@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/chevrolet-camaro.jpg</file>
+        <file>images/chevrolet-corvette.jpg</file>
+        <file>images/chevrolet-impala.jpg</file>
+        <file>images/clarice_the_bear.jpg</file>
+        <file>images/ford-escort.jpg</file>
+        <file>images/ford-galaxie.jpg</file>
+        <file>images/ford-ka.jpg</file>
+        <file>images/ford-mustang.jpg</file>
+        <file>images/jaguar-e-type.jpg</file>
+        <file>images/jaguar-x-type.jpg</file>
+        <file>images/leo_rubbernubs.jpg</file>
+        <file>images/nissan-qashqai.jpg</file>
+        <file>images/skinny_louie_bruno.jpg</file>
+        <file>images/stefano_the_gun.jpg</file>
+        <file>images/toyota-avensis.jpg</file>
+        <file>images/toyota-land-cruiser.jpg</file>
+        <file>images/vito_gallo.jpg</file>
+    </qresource>
+</RCC>
