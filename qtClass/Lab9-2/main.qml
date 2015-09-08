@@ -23,6 +23,8 @@ ApplicationWindow {
         anchors.fill: parent
         Text
         {
+            x: 0
+            y: 0
             height: parent.height
             width: parent.width
             text: "Hello World"
@@ -32,6 +34,14 @@ ApplicationWindow {
             font.pixelSize: 1000
             fontSizeMode: Text.Fit
             wrapMode: Text.WordWrap
+
+            Calendar {
+                id: calendar1
+                x: parent.width * .5
+                y: 0
+                width: parent.width *.5
+                height: parent.height
+            }
 
         }
 
