@@ -78,6 +78,9 @@
     <ClInclude Include="gogo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AutoCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gogo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

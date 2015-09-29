@@ -81,6 +81,7 @@
     <None Include="thumbScrew.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AutoCamera.h" />
     <ClInclude Include="AutoFocusAssistant.h" />
     <ClInclude Include="BackFlushDlg.h" />
     <ClInclude Include="DebugTimer.h" />
@@ -99,6 +100,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AutoCamera.cpp" />
     <ClCompile Include="AutoFocusAssistant.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

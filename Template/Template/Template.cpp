@@ -11,6 +11,8 @@
 #include "LaserStatusDialog.h"
 #include "BackFlushDlg.h"
 #include "PMTDlgCtrl.h"
+#include "AutoCamera.h"
+
 
 #include "Polygon.h"
 #include "Duity.h"
@@ -30,6 +32,9 @@ BackFlushDlg g_MyBackFlush;
 
 HWND g_hProgressDialog = NULL;
 PmtDlgCtrl g_PmtCtrl;
+
+
+AutoCamera g_CameraAuto;
 
 void LaunchPmtDialog();
 
@@ -181,7 +186,7 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case IDC_BUTTON_PMT_LAUNCH:			
 			{
 				
-				LaunchPmtDialog();
+				//LaunchPmtDialog();
 				//g_PmtCtrl.DoModeless(hDlg);
 
 				break;
@@ -285,17 +290,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		printf("%d ", r[i]);
 	}
 
-
-	HWND hDlg, hDlg2;
-	MSG msg;
-	BOOL ret;
+	HWND hDlg=NULL;
+	HWND hDlg2=NULL;
+	//MSG msg;
+	//BOOL ret;
 
 
 	InitCommonControls();
-	hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
-	SetTimer(hDlg, 0, 200, NULL);
-	SetTimer(hDlg, 1, 100, NULL);
-	SetTimer(hDlg, 2, 500, NULL);
+	//hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
+	//SetTimer(hDlg, 0, 200, NULL);
+	//SetTimer(hDlg, 1, 100, NULL);
+	//SetTimer(hDlg, 2, 500, NULL);
 
 	//DuityDlg MyDytDlg;
 	//MyDytDlg.DoModal();
@@ -303,7 +308,26 @@ int _tmain(int argc, _TCHAR* argv[])
 	//FeatureRegDlg gg;
 	//gg.DoModal();
 	
-	hDlg2 = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG_HSFC_FLOUR), 0, HSFCControlProc, 0);
+	//hDlg2 = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG_HSFC_FLOUR), 0, HSFCControlProc, 0);
+
+	AutoCameraData FPS;
+	FPS.current =50;
+	FPS.min =1;
+	FPS.max =100;
+
+	AutoCameraData Exposure;
+	Exposure.current = 40;
+	Exposure.min = 16;
+	Exposure.max = 40;
+
+	AutoCameraData FlashA;
+	FlashA.current = 99;
+	FlashA.min = 20;
+	FlashA.max = 100;
+
+	g_CameraAuto.setVars(FPS,FlashA,Exposure);
+
+	g_CameraAuto.DoModal();
 
 	/*
 	HsfcConfig HSFCCfg;
@@ -341,8 +365,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	//return 0;
 
 
-	ShowWindow(hDlg2, SW_SHOW);
+	if(hDlg2)
+		ShowWindow(hDlg2, SW_SHOW);
 
+	/*
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) {
 		if(ret == -1)
 			return -1;
@@ -352,6 +378,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			DispatchMessage(&msg);
 		}
 	}
+	*/
 
 	//Utils::DebugTimer MyTim;
 	//MyTim.ReportToDebugTerm();
@@ -403,5 +430,6 @@ void LaunchPmtDialog()
 	g_PmtCtrl.SetCh1WaveLengthString("532nm");
 	g_PmtCtrl.SetCh2WaveLengthString("700nm");
 	g_PmtCtrl.DoModal();
+
 }
 
