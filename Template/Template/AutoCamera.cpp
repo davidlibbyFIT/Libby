@@ -8,6 +8,9 @@
 #include <limits>
 
 
+static int SLIDE_PAGE_INC = 20;
+
+
 /**
 * CLASS AutoCamera
 *
@@ -79,6 +82,9 @@ LRESULT AutoCamera::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	m_LableFlashAmplitude = GetDlgItem(IDC_STATIC_LABLE_FLASH_AMPLITUDE);
 	m_SliderSetting = GetDlgItem(IDC_SLIDER_SETTING);
 
+	//SetTimer(this->m_hWnd, 0, 200, NULL);
+
+	SetTimer(NULL,100);
 
 	for (int ct=m_CtxFPS.min;ct<=m_CtxFPS.max;ct++)
 	{
@@ -96,13 +102,13 @@ LRESULT AutoCamera::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 
 
 
-
 	m_flashASize=m_CtxFlashA.max-m_CtxFlashA.min;	
 	m_exposure_uS_Size=m_CtxExposure.max-m_CtxExposure.min;	
 	m_overallSlideCtrlSize=m_flashASize*m_exposure_uS_Size;
 
 
 	SendMessage(m_SliderSetting, TBM_SETRANGE, 0, (LPARAM)MAKELONG(0, m_overallSlideCtrlSize));
+	SendMessage(m_SliderSetting, TBM_SETPAGESIZE , 0, SLIDE_PAGE_INC);
 
 	setSliderPos();
 
