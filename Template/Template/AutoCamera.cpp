@@ -14,7 +14,7 @@ static int SLIDE_PAGE_INC = 20;
 /**
 * CLASS AutoCamera
 *
-* @brief AutoCamera Back Flush to clean
+* @brief AutoCamera 
 *
 * @version 1.0 
 *
@@ -39,10 +39,15 @@ AutoCamera::AutoCamera():
 
 
 {
-
-
+	//THis Map is the lookup table for the Different speeds available to the user..
+	m_CameraSpeedMap_uS[0]=18;
+	m_CameraSpeedMap_uS[1]=23;
+	m_CameraSpeedMap_uS[2]=28;
+	m_CameraSpeedMap_uS[3]=33;
+	m_CameraSpeedMap_uS[4]=38;
 
 }
+
 
 AutoCamera::~AutoCamera(void)
 {
@@ -68,10 +73,6 @@ AutoCamera::~AutoCamera(void)
 LRESULT AutoCamera::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 
-	//std::string Start_mL="1.0";
-	//m_EditBoxExample=GetDlgItem(IDC_EDIT_AMOUNT_ML);
-	//m_EditBoxExample.SetWindowTextW(CA2W(Start_mL.c_str()).m_szBuffer);
-
 	m_ButtonSetLevel = GetDlgItem(IDC_BUTTON_SET_LEVEL);
 	m_ComboFPS = GetDlgItem(IDC_COMBO_FPS);
 	m_EditAverageBackground = GetDlgItem(IDC_EDIT_AVERAGE_BACKGROUND);
@@ -82,9 +83,11 @@ LRESULT AutoCamera::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	m_LableFlashAmplitude = GetDlgItem(IDC_STATIC_LABLE_FLASH_AMPLITUDE);
 	m_SliderSetting = GetDlgItem(IDC_SLIDER_SETTING);
 
+	//Add Camera Frames Per Second.
+	
 	//SetTimer(this->m_hWnd, 0, 200, NULL);
 
-	SetTimer(NULL,100);
+	//SetTimer(NULL,100);
 
 	for (int ct=m_CtxFPS.min;ct<=m_CtxFPS.max;ct++)
 	{
@@ -93,19 +96,15 @@ LRESULT AutoCamera::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 		SendMessage(m_ComboFPS, CB_ADDSTRING,0, (LPARAM) CA2W(buffer).m_szBuffer);	
 	}
 
+	//Populate the Edit Windows.
 	SetEditWindowValue(m_EditAverageBackground,0);
-
-	setSelectionByFps(m_CurrentFlashA.current);
+	setSelectionByExposure_us(m_CurrentFlashA.current);
 	SetEditWindowValue(m_EditFlashAmplitude,m_CurrentFlashA.current);
-	SetEditWindowValue(m_EditExposureUs,m_CurrentExposure.current);
-
-
-
+	SetEditWindowValue(m_EditExposureUs,m_CameraSpeedMap_uS[0]);
 
 	m_flashASize=m_CtxFlashA.max-m_CtxFlashA.min;	
-	m_exposure_uS_Size=m_CtxExposure.max-m_CtxExposure.min;	
+	m_exposure_uS_Size=m_CameraSpeedMap_uS.size();
 	m_overallSlideCtrlSize=m_flashASize*m_exposure_uS_Size;
-
 
 	SendMessage(m_SliderSetting, TBM_SETRANGE, 0, (LPARAM)MAKELONG(0, m_overallSlideCtrlSize));
 	SendMessage(m_SliderSetting, TBM_SETPAGESIZE , 0, SLIDE_PAGE_INC);
@@ -119,19 +118,58 @@ LRESULT AutoCamera::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	{		
 		SetWindowPos(HWND_BOTTOM,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
 	}
-
+	
+	//SetTimer(NULL,100);
 	return 1;
-};
+}
 
+
+/**
+* FUNCTION OnTimer
+*
+* @brief Timer for test purpose.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/29/2015 2:54:19 PM
+*
+* @param uMsg 
+* @param wParam 
+* @param lParam 
+* @param bHandled 
+*
+* @return LRESULT 
+*/
+LRESULT AutoCamera::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	//SetEditWindowValue(m_EditAverageBackground,getSliderPos());
+	return 1;
+}
+
+/**
+* FUNCTION setSliderPos
+*
+* @brief Sets the slider position for a given 
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/29/2015 2:54:41 PM
+*
+*/
 void AutoCamera::setSliderPos()
 {
 	int curFa= GetEditWindowValue(m_EditFlashAmplitude) - m_CurrentFlashA.min ; //IE 0-80
-	int cur_us= GetEditWindowValue(m_EditExposureUs) - m_CurrentExposure.min ;	
-	if(cur_us==0)
-		cur_us=1;
-	if(curFa==0)
-		curFa=1;
-	int curpos = curFa * cur_us;
+	int cur_us= GetEditWindowValue(m_EditExposureUs)  ;	
+	
+	int mapKeyPos=findCameraSpeedKey(cur_us);
+
+	//If we did not find the position take the first one...
+	if(mapKeyPos<=0)
+		mapKeyPos=1;
+	
+	int curpos = curFa * mapKeyPos;
 	
 	if(curpos<0)
 		curpos=0;
@@ -143,6 +181,19 @@ void AutoCamera::setSliderPos()
 
 }
 
+/**
+* FUNCTION getSliderPos
+*
+* @brief 
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/30/2015 10:09:06 AM
+*
+*
+* @return int 
+*/
 int AutoCamera::getSliderPos()
 {
 	return SendMessageW(m_SliderSetting,TBM_GETPOS,0,0);
@@ -321,7 +372,7 @@ LRESULT AutoCamera::OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 *
 * @return LRESULT 
 */
-LRESULT AutoCamera::OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT AutoCamera::OnBnClickedOk(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 {
 	if (m_bModal)
 		EndDialog(IDCANCEL);
@@ -330,7 +381,19 @@ LRESULT AutoCamera::OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWn
 	return 0;
 }
 
-void AutoCamera::setSelectionByFps(int findInt)
+/**
+* FUNCTION setSelectionByExposure_us
+*
+* @brief given a Exposure time in uS return the index in the map.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/30/2015 10:09:18 AM
+*
+* @param findInt 
+*/
+void AutoCamera::setSelectionByExposure_us(int findInt)
 {
 	char buffer [33];
 	_itoa_s (findInt,buffer,10);
@@ -425,6 +488,23 @@ std::string AutoCamera::RetriveStdStringFromCWindow(CWindow &TempWindow)
 	delete[] buffer;
 	return SimpString;
 }
+/**
+* FUNCTION OnHScroll
+*
+* @brief Windows Handle for scroll
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/30/2015 10:10:38 AM
+*
+* @param uMsg 
+* @param wParam 
+* @param lParam 
+* @param bHandled 
+*
+* @return LRESULT 
+*/
 LRESULT AutoCamera::OnHScroll(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	int nScrollCode = (int) LOWORD(wParam); // scroll bar value
@@ -462,27 +542,7 @@ LRESULT AutoCamera::OnHScroll(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				case IDC_SLIDER_SETTING:
 					{
 						
-						int flashPos;
-						int exposurePos;
-
-						int scrollPos=getSliderPos();
-
-						int whole=scrollPos/m_flashASize;
-						int remainder=scrollPos%m_flashASize;
-
-						exposurePos= whole + m_CtxExposure.min;
-
-						//if(remainder>0)
-						//	 exposurePos =  remainder + 1;
-
-
-						if(whole==0)
-							exposurePos=m_CtxExposure.min;
-
-						flashPos= remainder+m_CtxFlashA.min;
-						
-						SetEditWindowValue(m_EditExposureUs,exposurePos);
-						SetEditWindowValue(m_EditFlashAmplitude,flashPos);
+						UpdateFlashAndExposure();
 
 						break;
 					}
@@ -497,5 +557,105 @@ LRESULT AutoCamera::OnHScroll(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 
 
 	return 0;
+}
+
+void AutoCamera::UpdateFlashAndExposure()
+{
+	int flashPos;
+	int exposurePos;
+
+	CalculateExposureAndFlash(exposurePos, flashPos);
+
+
+
+	SetEditWindowValue(m_EditExposureUs,m_CameraSpeedMap_uS[exposurePos]);
+	SetEditWindowValue(m_EditFlashAmplitude,flashPos);
+}
+
+/**
+* FUNCTION CalculateExposureAndFlash
+*
+* @brief Calculates the Exposure and flash based on Slider Position.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/29/2015 1:35:50 PM
+*
+* @param exposurePos 
+* @param flashPos 
+*/
+void AutoCamera::CalculateExposureAndFlash(int &exposurePos, int &flashPos)
+{
+	int scrollPos=getSliderPos();
+
+	int whole=scrollPos/m_flashASize;
+	int remainder=scrollPos%m_flashASize;
+
+	exposurePos= whole + 0;
+
+	//if(remainder>0)
+	//	 exposurePos =  remainder + 1;
+
+
+	if(whole==0)
+		exposurePos=0;
+
+	if(exposurePos>(int)m_CameraSpeedMap_uS.size()-1)
+		exposurePos=m_CameraSpeedMap_uS.size()-1;
+
+	flashPos= remainder+m_CtxFlashA.min;
+}
+
+
+
+LRESULT AutoCamera::OnBnClickedButtonSetLevel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	int averageBackground = GetEditWindowValue(m_EditAverageBackground);
+	
+	for (int curpos=0;curpos<=m_overallSlideCtrlSize;curpos++)
+	{
+		SendMessageW(m_SliderSetting,TBM_SETPOS,true, curpos);
+		UpdateFlashAndExposure();
+		Sleep(1);
+		
+		if(averageBackground==curpos)
+			break;
+
+
+	}
+	return 0;
+}
+/**
+* FUNCTION findCameraSpeedKey
+*
+* @brief Finds the map key for a given camera speed. 
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 9/29/2015 2:50:50 PM
+*
+* @param fintValue in microsecond.
+*
+* @return int 
+*/
+int AutoCamera::findCameraSpeedKey(int fintValue_uS)
+{
+	int key=-1;
+	std::map<int, int>::iterator it = m_CameraSpeedMap_uS.begin(); // internalMap is std::map
+	while(it != m_CameraSpeedMap_uS.end())
+	{
+		bool found = (it->second == fintValue_uS);
+		if(found)
+		{
+			key=it->first;
+			break;
+		}
+		++it;
+	}
+
+	return key;
+
 }
 

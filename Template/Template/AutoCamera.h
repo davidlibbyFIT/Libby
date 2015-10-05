@@ -8,7 +8,7 @@
 #include <atlbase.h>
 #include <atlwin.h>
 #include <string>
-
+#include <map>
 
 struct AutoCameraData
 {
@@ -27,6 +27,8 @@ class AutoCamera: public CDialogImpl<AutoCamera>
 {
 public:
 	AutoCamera();
+
+
 	~AutoCamera(void);
 
 	void setVars(AutoCameraData &FPS,AutoCameraData &FlashA,AutoCameraData & Exposure);
@@ -58,8 +60,9 @@ public:
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnBnClickedCancel)
 		COMMAND_HANDLER(IDOK, BN_CLICKED, OnBnClickedOk)
-		MESSAGE_HANDLER(WM_HSCROLL, OnHScroll)
-
+		MESSAGE_HANDLER(WM_HSCROLL, OnHScroll)		
+		MESSAGE_HANDLER(WM_TIMER, OnTimer)
+		COMMAND_HANDLER(IDC_BUTTON_SET_LEVEL, BN_CLICKED, OnBnClickedButtonSetLevel)
 	END_MSG_MAP()
 
 
@@ -80,10 +83,10 @@ private:
 
 public:
 	LRESULT OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-	LRESULT OnBnClickedOk(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBnClickedOk(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
-	void setSelectionByFps(int findInt);
+	void setSelectionByExposure_us(int findInt);
 
 private:
 	std::string AutoCamera::intToString(int Value);
@@ -96,6 +99,13 @@ private:
 	void setSliderPos();
 
 	LRESULT OnHScroll(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+
+	void UpdateFlashAndExposure();
+
+	LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+
+	void CalculateExposureAndFlash(int &exposurePos, int &flashPos);
+	int findCameraSpeedKey(int fintValue_uS);
 
 
 public:
@@ -110,10 +120,13 @@ public:
 
 	AutoCameraData m_Slider;
 
+	std::map <int,int> m_CameraSpeedMap_uS;
+
 	int m_flashASize;
 	int m_exposure_uS_Size;
 	int m_overallSlideCtrlSize;
 
+	LRESULT OnBnClickedButtonSetLevel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };
 
 #endif // AUTO_CAMERA_H
