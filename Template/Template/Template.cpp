@@ -20,7 +20,7 @@
 #include "FeatureRegDlg.h"
 #include "HsfcConfig.h"
 #include "GoGo.h"
-
+#include "VersaDlg.h"
 
 //#include "DebugTimer.h"
 
@@ -35,6 +35,7 @@ PmtDlgCtrl g_PmtCtrl;
 
 
 AutoCamera g_CameraAuto;
+VersaDlg g_Versa;
 
 void LaunchPmtDialog();
 
@@ -325,9 +326,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	FlashA.min = 20;
 	FlashA.max = 100;
 
-	g_CameraAuto.setVars(FPS,FlashA,Exposure);
+	//g_CameraAuto.setVars(FPS,FlashA,Exposure);
 
-	g_CameraAuto.DoModal();
+	//g_CameraAuto.DoModal();
+	g_Versa.DoModal();
 
 	/*
 	HsfcConfig HSFCCfg;

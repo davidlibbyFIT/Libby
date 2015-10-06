@@ -81,6 +81,9 @@
     <ClInclude Include="AutoCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VersaDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -129,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AutoCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VersaDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
