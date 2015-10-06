@@ -17,6 +17,20 @@ VersaCom::~VersaCom(void)
 	stopWorkingThread();
 }
 
+/**
+* FUNCTION setFileName
+*
+* @brief Sets the filename of the ini file to watch.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 10/6/2015 4:14:03 PM
+*
+* @param newFileName 
+*
+* @return VersaReturn 
+*/
 VersaReturn VersaCom::setFileName(const std::string &newFileName)
 {
 	
@@ -28,6 +42,20 @@ VersaReturn VersaCom::setFileName(const std::string &newFileName)
 	return VERSA_OK;
 	
 }
+/**
+* FUNCTION fileExists
+*
+* @brief Checks to see if the file exists..
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 10/6/2015 4:14:27 PM
+*
+* @param newFileName 
+*
+* @return bool 
+*/
 bool VersaCom::fileExists(const std::string &newFileName)
 {
 	bool exists=false;
@@ -36,7 +64,7 @@ bool VersaCom::fileExists(const std::string &newFileName)
 		exists=true;
 	return exists;
 }
-std::string VersaCom::getStatusString(VersaStatus status)
+std::string VersaCom::convertStatusToStrig(VersaStatus status)
 {
 
 	/*
@@ -62,13 +90,33 @@ std::string VersaCom::getStatusString(VersaStatus status)
 				break;
 		case VERSA_STATUS_ERROR:
 			return "Fluid Imager returns error or VERSA Appl. 110 returns hardware error (all execution is stopped; the 500 ms timer is not disabled; error	message is displayed by VERSA Appl. 110)";
-				break;
+			break;
+		case VERSA_VISUAL_SPREADSHEET_IDLE:
+			return "Visual Spreadsheet is Idle and Waiting for a command.";
+			break;
+		case VERSA_ALL_STOP:
+			return "THings have gone sideways everyone stop.";
+			break;
 
 	}
 
 	return "Bad Parameter";
 }
 
+/**
+* FUNCTION workingThread
+*
+* @brief Thread the watches the ini file.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 10/6/2015 4:16:34 PM
+*
+* @param args 
+*
+* @return unsigned 
+*/
 unsigned __stdcall VersaCom::workingThread(void* args)
 {
 
@@ -91,6 +139,17 @@ unsigned __stdcall VersaCom::workingThread(void* args)
 	return 0;
 }
 
+/**
+* FUNCTION theFileChanged
+*
+* @brief Callback function that will alert when the file has changed.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 10/6/2015 4:16:49 PM
+*
+*/
 void VersaCom::theFileChanged()
 {
 	static int ct=0;
@@ -98,6 +157,19 @@ void VersaCom::theFileChanged()
 	std::cout << "File Changed " << ct << " Time(s)\n";
 }
 
+/**
+* FUNCTION startWorkingThread
+*
+* @brief Starts the thread.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 10/6/2015 4:17:20 PM
+*
+*
+* @return VersaReturn 
+*/
 VersaReturn VersaCom::startWorkingThread()
 {
 	unsigned int threadId;
@@ -129,6 +201,19 @@ VersaReturn VersaCom::startWorkingThread()
 	return VERSA_OK;
 }
 
+/**
+* FUNCTION stopWorkingThread
+*
+* @brief Stop the thread.
+*
+* @version 1.0 
+*
+* @author David Libby
+* @date 10/6/2015 4:17:40 PM
+*
+*
+* @return VersaReturn 
+*/
 VersaReturn VersaCom::stopWorkingThread()
 {
 	if (m_grabThreadRunning) {

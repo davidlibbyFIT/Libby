@@ -43,7 +43,7 @@ public:
 	~VersaCom(void);
 	VersaReturn setFileName(const std::string &newFileName);
 	bool fileExists(const std::string &newFileName);
-	std::string getStatusString(VersaStatus status);
+	std::string convertStatusToStrig(VersaStatus status);
 	VersaReturn startWorkingThread();
 	VersaReturn stopWorkingThread();
 
