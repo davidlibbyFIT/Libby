@@ -77,11 +77,15 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileInformation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="VersaCom.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileInformation.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="VersaCom.cpp" />
     <ClCompile Include="WatchFile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
