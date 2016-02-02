@@ -8,10 +8,21 @@
 #include <atlbase.h>
 #include <atlwin.h>
 
+//class StradusObserver;
+
+enum LaserDialogLaserStatus
+{
+	LASER_DIALOG_LASER_ON,
+	LASER_DIALOG_LASER_STANDBY,
+	LASER_DIALOG_LASER_OFF
+
+};
+
+
 class LaserStatusDialog: public CDialogImpl<LaserStatusDialog>
 {
 public:
-	LaserStatusDialog(void);
+	LaserStatusDialog();
 	~LaserStatusDialog(void);
 
 	
@@ -43,7 +54,7 @@ public:
 
 	void SetCurrentTempC(double NewTempature);
 	double GetCurrentTempC(){return m_dCurrentTempCelsius;};
-	bool IsLaserRunning(){return m_bLaserOn;};
+	void SetLaserState(LaserDialogLaserStatus newState);
 
 	void DrawTemperaturePointer(POINT &StartLoc, HDC hdc);
 
@@ -51,15 +62,21 @@ public:
 
 	int CalculateZoneHeightPix(int Percent, int OverallHeight);
 
+	void SetPower(int newPower);
+	bool getEmergencyStop(){return m_EmergencyStop;};
 	
 
 	LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnMouseLeave(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnWindowPosChanged(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	LRESULT OnClose(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	void DrawHorizontalGraidentRect(HDC &hdc, COLORREF Start, COLORREF End,const RECT &rect );
 	void DrawVerticalGraidentRect(HDC &hdc, COLORREF Start, COLORREF End,const RECT &rect );
 	void DrawTempatureScaleText(HDC &hdc,RECT DrawArea,std::string TempString);
+	void SetWaveLength(std::string &newWave);
+	void SetStatusText(std::string NewStatus);
 
 	BEGIN_MSG_MAP(LaserStatusDialog)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
@@ -67,6 +84,8 @@ public:
 		MESSAGE_HANDLER(WM_MOUSEMOVE, OnMouseMove)
 		MESSAGE_HANDLER(WM_MOUSELEAVE, OnMouseLeave)
 		MESSAGE_HANDLER(WM_WINDOWPOSCHANGED, OnWindowPosChanged)
+		MESSAGE_HANDLER(WM_CLOSE, OnClose)
+		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnBnClickedCancel)
 		COMMAND_HANDLER(ID_APPLY, BN_CLICKED, OnBnClickedApply)
 		COMMAND_HANDLER(ID_START_STOP, BN_CLICKED, OnBnClickedStartStop)
@@ -74,7 +93,6 @@ public:
 
 	void SetWindowSmall(bool set=true);
 	
-
 private:
 
 	//! Track Modal State
@@ -92,12 +110,16 @@ private:
 	RECT m_StaticLaserStatusRectangle;
 	double m_dDegreesCPerPix;
 	double m_dCurrentTempCelsius;
-	bool m_bLaserOn;
+	LaserDialogLaserStatus m_eLaserState;
+	bool m_EmergencyStop;
 
 	int m_Power_mW;
 	CWindow m_StaticStringWavelength;
-	CWindow m_Edit_Power;
+	CWindow m_Static_Text_Power;
 	CWindow m_Button_Start_Stop;
+	CWindow m_Static_Text_Status;
+
+	//std::shared_ptr <StradusObserver> m_pStratusObserver;
 
 
 
