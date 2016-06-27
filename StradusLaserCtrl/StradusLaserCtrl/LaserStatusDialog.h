@@ -8,6 +8,8 @@
 #include <atlbase.h>
 #include <atlwin.h>
 
+class StradusUSB;
+
 class LaserStatusDialog: public CDialogImpl<LaserStatusDialog>
 {
 public:
@@ -34,6 +36,8 @@ public:
 	//! Constructor.
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
+	void UpdateLaserInfo();
+
 	void SetStartStopStatusText();
 
 	//! Paint
@@ -43,7 +47,6 @@ public:
 
 	void SetCurrentTempC(double NewTempature);
 	double GetCurrentTempC(){return m_dCurrentTempCelsius;};
-	bool IsLaserRunning(){return m_bLaserOn;};
 
 	void DrawTemperaturePointer(POINT &StartLoc, HDC hdc);
 
@@ -61,12 +64,15 @@ public:
 	void DrawVerticalGraidentRect(HDC &hdc, COLORREF Start, COLORREF End,const RECT &rect );
 	void DrawTempatureScaleText(HDC &hdc,RECT DrawArea,std::string TempString);
 
+	std::string RetriveStdStringFromCWindow(CWindow &TempWindow);
+
 	BEGIN_MSG_MAP(LaserStatusDialog)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
 		MESSAGE_HANDLER(WM_MOUSEMOVE, OnMouseMove)
 		MESSAGE_HANDLER(WM_MOUSELEAVE, OnMouseLeave)
 		MESSAGE_HANDLER(WM_WINDOWPOSCHANGED, OnWindowPosChanged)
+		MESSAGE_HANDLER(WM_TIMER, OnTimer)
 		COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnBnClickedCancel)
 		COMMAND_HANDLER(ID_APPLY, BN_CLICKED, OnBnClickedApply)
 		COMMAND_HANDLER(ID_START_STOP, BN_CLICKED, OnBnClickedStartStop)
@@ -92,12 +98,20 @@ private:
 	RECT m_StaticLaserStatusRectangle;
 	double m_dDegreesCPerPix;
 	double m_dCurrentTempCelsius;
-	bool m_bLaserOn;
+	int m_bLaserState;
 
-	int m_Power_mW;
 	CWindow m_StaticStringWavelength;
 	CWindow m_Edit_Power;
 	CWindow m_Button_Start_Stop;
+	CWindow m_Button_Set;
+	CWindow m_Edit_power;
+	UINT_PTR m_pTimer;
+	float m_PastPowermW;
+
+
+	std::unique_ptr < StradusUSB > m_pLaser;
+
+
 
 
 
@@ -105,5 +119,6 @@ public:
 	LRESULT OnBnClickedCancel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedApply(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedStartStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 };
 

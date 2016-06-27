@@ -108,9 +108,9 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//g_MyBackFlush.DoModal();
 			//DestroyWindow(hDlg);
 
-			g_MyLaser.SetOnTop(true);
-			double NewTempature=22;
-			g_MyLaser.SetCurrentTempC(NewTempature);
+			//g_MyLaser.SetOnTop(true);
+			//double NewTempature=22;
+			//g_MyLaser.SetCurrentTempC(NewTempature);
 			//g_MyLaser.DoModeless();
 
 			//DestroyWindow(hDlg);
@@ -293,15 +293,15 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	HWND hDlg=NULL;
 	HWND hDlg2=NULL;
-	//MSG msg;
-	//BOOL ret;
+	MSG msg;
+	BOOL ret;
 
 
 	InitCommonControls();
-	//hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
-	//SetTimer(hDlg, 0, 200, NULL);
-	//SetTimer(hDlg, 1, 100, NULL);
-	//SetTimer(hDlg, 2, 500, NULL);
+	hDlg = CreateDialogParam(NULL, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
+	SetTimer(hDlg, 0, 200, NULL);
+	SetTimer(hDlg, 1, 100, NULL);
+	SetTimer(hDlg, 2, 10, NULL);
 
 	//DuityDlg MyDytDlg;
 	//MyDytDlg.DoModal();
@@ -326,10 +326,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	FlashA.min = 20;
 	FlashA.max = 100;
 
-	//g_CameraAuto.setVars(FPS,FlashA,Exposure);
+	g_CameraAuto.setVars(FPS,FlashA,Exposure);
 
 	//g_CameraAuto.DoModal();
-	g_Versa.DoModal();
+
+	//g_MyLaser.SetOnTop(true);
+	//double NewTempature=22;
+	//g_MyLaser.SetCurrentTempC(NewTempature);
+
+	//g_MyLaser.DoModeless();
+
+	
+	//g_Versa.DoModal();
 
 	/*
 	HsfcConfig HSFCCfg;
@@ -365,12 +373,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//LaunchPmtDialog();
 	//return 0;
+	if(hDlg)
+		ShowWindow(hDlg, SW_SHOW);
 
 
 	if(hDlg2)
 		ShowWindow(hDlg2, SW_SHOW);
 
-	/*
+	
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) {
 		if(ret == -1)
 			return -1;
@@ -380,7 +390,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			DispatchMessage(&msg);
 		}
 	}
-	*/
+	
 
 	//Utils::DebugTimer MyTim;
 	//MyTim.ReportToDebugTerm();
