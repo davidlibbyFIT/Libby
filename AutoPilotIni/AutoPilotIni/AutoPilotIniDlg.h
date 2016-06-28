@@ -152,6 +152,9 @@ private:
 	CEdit m_EditDelaySeconds1;
 	
 	std::string m_statusFileName;
+	std::string m_LocalIni;
+	int m_TimeoutAmount;
+
 	VersaIniData m_CurrentStatus;
 	int m_CountDown;
 
@@ -180,4 +183,11 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	CStatic m_StatusText;
 	CEdit m_EditCountDown;
+	CEdit m_Edit_StatusIni;
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnClose();
+	afx_msg void OnEnChangeEditStatusIni();
+	afx_msg void OnBnClickedButtonOpen();
+	CButton m_ButtonOpen;
 };
+void StdStringExtractPathFileExt(const std::string &FullString, std::string &Filename, std::string &Path, std::string &Ext);

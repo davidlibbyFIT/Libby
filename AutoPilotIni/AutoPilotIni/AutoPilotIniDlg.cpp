@@ -61,7 +61,13 @@ CAutoPilotIniDlg::CAutoPilotIniDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_statusFileName = "C:\\Programdata\\FluidImaging\\VisualSpreadsheet\\Hardware\\Autosampler\\Versa\\status.ini";
 	m_pFileInformation.reset(new FileInformation(m_statusFileName.c_str()));
-	m_CountDown = COUNT_DOWN_SECONDS;
+	m_TimeoutAmount = COUNT_DOWN_SECONDS;
+
+	CHAR path[MAX_PATH];
+	GetModuleFileName(NULL, path, MAX_PATH);
+	std::string Filename, Ext;
+	StdStringExtractPathFileExt(path, Filename, m_LocalIni, Ext);
+	m_LocalIni += "\\AutoPilotIni.ini";
 }
 CAutoPilotIniDlg::~CAutoPilotIniDlg()
 {
@@ -82,6 +88,8 @@ void CAutoPilotIniDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, EDIT_DELAY_SECONDS_2, m_EditDelaySeconds2);
 	DDX_Control(pDX, 1015, m_StatusText);
 	DDX_Control(pDX, EDIT_COUNT, m_EditCountDown);
+	DDX_Control(pDX, IDC_EDIT_STATUS_INI, m_Edit_StatusIni);
+	DDX_Control(pDX, IDC_BUTTON_OPEN, m_ButtonOpen);
 }
 
 BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
@@ -89,6 +97,10 @@ BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDOK, &CAutoPilotIniDlg::OnBnClickedOk)
+	ON_WM_CLOSE()
+	ON_EN_CHANGE(IDC_EDIT_STATUS_INI, &CAutoPilotIniDlg::OnEnChangeEditStatusIni)
+	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CAutoPilotIniDlg::OnBnClickedButtonOpen)
 END_MESSAGE_MAP()
 
 
@@ -118,10 +130,13 @@ BOOL CAutoPilotIniDlg::OnInitDialog()
 		}
 	}
 
+
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
+
+	m_CountDown = m_TimeoutAmount;
 
 	// TODO: Add extra initialization here
 	startWorkingThread();
@@ -233,7 +248,15 @@ void CAutoPilotIniDlg::readCurrentStatus(VersaIniData &Current)
 {
 	char buff[255] = { 0 };
 
-	GetPrivateProfileString("Status", "Status", "5", buff, sizeof(buff), m_statusFileName.c_str());
+	GetPrivateProfileString("StatusFile", "Location", m_statusFileName.c_str(), buff, sizeof(buff), m_LocalIni.c_str());
+	m_statusFileName = buff;
+
+	GetPrivateProfileString("TimeOut", "Seconds", std::to_string(m_TimeoutAmount).c_str(), buff, sizeof(buff), m_LocalIni.c_str());
+	m_TimeoutAmount = atoi(buff);
+
+
+
+	GetPrivateProfileString("Status", "Status", "0", buff, sizeof(buff), m_statusFileName.c_str());
 	Current.status=(VersaStatus)atoi(buff);
 
 	GetPrivateProfileString("Status", "SampleType", "0", buff, sizeof(buff), m_statusFileName.c_str());
@@ -258,6 +281,7 @@ void CAutoPilotIniDlg::readCurrentStatus(VersaIniData &Current)
 
 	GetPrivateProfileString("Status", "DelaySeconds2", "0", buff, sizeof(buff), m_statusFileName.c_str());
 	Current.delaySeconds2 = (VersaSampleType)atoi(buff);
+
 }
 
 
@@ -289,6 +313,15 @@ void CAutoPilotIniDlg::writeCurrentStatus()
 {
 	char Nubuff[255] = { 0 };
 
+	CString rstrString;
+	m_Edit_StatusIni.GetWindowText(rstrString);
+	std::string WinText = rstrString;
+	if (WinText != m_statusFileName)
+	{
+		m_statusFileName = WinText;
+	}
+	WritePrivateProfileString("TimeOut", "Seconds", std::to_string(m_TimeoutAmount).c_str(), m_LocalIni.c_str());
+	WritePrivateProfileString("StatusFile", "Location", m_statusFileName.c_str(), m_LocalIni.c_str());
 
 	sprintf_s(Nubuff, sizeof(Nubuff), "%d", m_CurrentStatus.status);
 	WritePrivateProfileString("Status", "Status", Nubuff, m_statusFileName.c_str());
@@ -315,6 +348,9 @@ void CAutoPilotIniDlg::writeCurrentStatus()
 
 	sprintf_s(Nubuff, sizeof(Nubuff), "%d", m_CurrentStatus.delaySeconds2);
 	WritePrivateProfileString("Status", "DelaySeconds2", Nubuff, m_statusFileName.c_str());
+
+
+	
 	UpdateStatus();
 
 
@@ -322,13 +358,6 @@ void CAutoPilotIniDlg::writeCurrentStatus()
 std::string CAutoPilotIniDlg::GetShortStatus()
 {
 
-	/*
-	Status=0 -- idle status (updated by VERSA Appl. 110 when VERSA 110 instrument is initialized with home toolbar button or when the sequence starts running)
-	Status=1 -- acknowledgement by Fluid Imager software (when Fluid Imager reads Status=3, Fluid Imager immediately updates Status=1)
-	Status=3 -- VERSA Appl. 110 tells Fluid Imager to start reading a single sample that was just dispensed into injection port (after first delay if available)
-	Status=4 -- Fluid Imager tells VERSA Appl. 110 that a single sample was successfully read (VERSA Appl. 110 proceeds to next sample or wash sequence after second delay if available)
-	Status=5 -- Fluid Imager returns error or VERSA Appl. 110 returns hardware error (all execution is stopped; the 500 ms timer is not disabled; error	message is displayed by VERSA Appl. 110)
-	*/
 	std::string ret;
 	ret = std::to_string(m_CurrentStatus.status) + " ( ";
 	switch (m_CurrentStatus.status)
@@ -424,7 +453,7 @@ void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
 				KillTimer(SAMPLE_TIMER);
 				m_StatusText.SetWindowText("Purging Flowcell");
 				SetTimer(PURGE_TIMER, 1000, NULL);
-				m_CountDown = COUNT_DOWN_SECONDS;
+				m_CountDown = m_TimeoutAmount;
 				m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
 				writeCurrentStatus();
 			}
@@ -439,7 +468,7 @@ void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
 				KillTimer(RINSE_TIMER);
 				m_StatusText.SetWindowText("Purging Flowcell");
 				SetTimer(PURGE_TIMER, 1000, NULL);
-				m_CountDown = COUNT_DOWN_SECONDS;
+				m_CountDown = m_TimeoutAmount;
 				m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
 				writeCurrentStatus();
 			}
@@ -478,6 +507,8 @@ void CAutoPilotIniDlg::UpdateStatus()
 	m_EditSampleId.SetWindowText(m_CurrentStatus.sampleID.c_str());
 	m_EditSample.SetWindowText(std::to_string(m_CurrentStatus.SampleVolume_ml).c_str());
 	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
+	m_Edit_StatusIni.SetWindowText(m_statusFileName.c_str());
+
 
 	if (m_CurrentStatus.status == VERSA_VISUAL_START_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
 	{
@@ -485,30 +516,35 @@ void CAutoPilotIniDlg::UpdateStatus()
 		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
 		writeCurrentStatus();
 		SetTimer(PURGE_TIMER, 1000,NULL );
-		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CountDown = m_TimeoutAmount;
+		m_ButtonOpen.EnableWindow(0);
+
 	}
 	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_STANDARD)
 	{
 		m_StatusText.SetWindowText("Processing Sample");
 		SetTimer(SAMPLE_TIMER, 1000, NULL);
-		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CountDown = m_TimeoutAmount;
 		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_ButtonOpen.EnableWindow(0);
 		writeCurrentStatus();
 	}
 	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_CLEAN)
 	{
 		m_StatusText.SetWindowText("Wash / Rinse Flowcell");
 		SetTimer(RINSE_TIMER, 1000, NULL);
-		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CountDown = m_TimeoutAmount;
 		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		m_ButtonOpen.EnableWindow(0);
 		writeCurrentStatus();
 	}
 	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
 	{
 		m_StatusText.SetWindowText("Flood Flowcell End Of Day");
 		SetTimer(EOD_TIMER, 1000, NULL);
-		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CountDown = m_TimeoutAmount;
 		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		m_ButtonOpen.EnableWindow(0);
 		writeCurrentStatus();
 	}
 	else if (m_CurrentStatus.status == VERSA_VISUAL_END_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
@@ -519,8 +555,63 @@ void CAutoPilotIniDlg::UpdateStatus()
 	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY )
 	{
 		m_StatusText.SetWindowText("Ready For Next Sample");
-		//UpdateStatus();
+		m_ButtonOpen.EnableWindow(1);
 	}
 
 	m_EditCountDown.SetWindowText(std::to_string(m_CountDown).c_str());
+}
+void StdStringExtractPathFileExt(const std::string &FullString, std::string &Filename, std::string &Path, std::string &Ext)
+{
+	Filename = Path = FullString;
+	Ext.clear();
+
+	// Remove directory if present.
+	const size_t last_slash_idx = Filename.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		Filename.erase(0, last_slash_idx + 1);
+		Path.erase(last_slash_idx, Path.length() - last_slash_idx);
+
+	}
+
+	// Remove extension if present.
+	Ext = Filename;
+	const size_t period_idx = Filename.rfind('.');
+	if (std::string::npos != period_idx)
+	{
+		Filename.erase(period_idx);
+		Ext.erase(0, period_idx + 1);
+	}
+}
+
+void CAutoPilotIniDlg::OnBnClickedOk()
+{
+	writeCurrentStatus();
+	CDialogEx::OnOK();
+}
+
+
+void CAutoPilotIniDlg::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+
+	writeCurrentStatus();
+	CDialogEx::OnClose();
+}
+
+
+void CAutoPilotIniDlg::OnEnChangeEditStatusIni()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialogEx::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+}
+
+
+void CAutoPilotIniDlg::OnBnClickedButtonOpen()
+{
+	HINSTANCE ff= ShellExecute(0, "open", "notepad", m_statusFileName.c_str(), 0, SW_SHOW);
 }
