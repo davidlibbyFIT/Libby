@@ -12,6 +12,11 @@
 #define new DEBUG_NEW
 #endif
 
+#define RINSE_TIMER 1001
+#define PURGE_TIMER 1002
+#define SAMPLE_TIMER 1003
+#define EOD_TIMER 1004
+#define COUNT_DOWN_SECONDS 10
 
 // CAboutDlg dialog used for App About
 
@@ -56,8 +61,7 @@ CAutoPilotIniDlg::CAutoPilotIniDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_statusFileName = "C:\\Programdata\\FluidImaging\\VisualSpreadsheet\\Hardware\\Autosampler\\Versa\\status.ini";
 	m_pFileInformation.reset(new FileInformation(m_statusFileName.c_str()));
-	
-
+	m_CountDown = COUNT_DOWN_SECONDS;
 }
 CAutoPilotIniDlg::~CAutoPilotIniDlg()
 {
@@ -76,12 +80,15 @@ void CAutoPilotIniDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, EDIT_SAMPLE_ID, m_EditSampleId);
 	DDX_Control(pDX, EDIT_SAMPLES, m_EditSample);
 	DDX_Control(pDX, EDIT_DELAY_SECONDS_2, m_EditDelaySeconds2);
+	DDX_Control(pDX, 1015, m_StatusText);
+	DDX_Control(pDX, EDIT_COUNT, m_EditCountDown);
 }
 
 BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -212,61 +219,48 @@ bool CAutoPilotIniDlg::startWorkingThread()
 
 void CAutoPilotIniDlg::theFileChanged()
 {
-
-	readCurrentStatus();
+	static VersaIniData Current;
+	readCurrentStatus(Current);
+	if (Current != m_CurrentStatus) 
+	{
+		m_CurrentStatus = Current;
+		UpdateStatus();
+	}
 
 
 }
-void CAutoPilotIniDlg::readCurrentStatus()
+void CAutoPilotIniDlg::readCurrentStatus(VersaIniData &Current)
 {
 	char buff[255] = { 0 };
 
 	GetPrivateProfileString("Status", "Status", "5", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.status=(VersaStatus)atoi(buff);
+	Current.status=(VersaStatus)atoi(buff);
 
 	GetPrivateProfileString("Status", "SampleType", "0", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.sampleType = (VersaSampleType)atoi(buff);
+	Current.sampleType = (VersaSampleType)atoi(buff);
 
 	GetPrivateProfileString("Status", "PlateWell", "NA", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.plateWell = buff;
+	Current.plateWell = buff;
 
 	GetPrivateProfileString("Status", "Barcode", "NA", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.barcode = buff;
+	Current.barcode = buff;
 
 	GetPrivateProfileString("Status", "SampleID", "NA", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.sampleID = buff;
+	Current.sampleID = buff;
 
 	GetPrivateProfileString("Status", "DelaySeconds1", "0", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.delaySeconds1 = (VersaSampleType)atoi(buff);
-
-	//Doc UpdateFix
-	// 	GetPrivateProfileString("Status", "SampleVolume", "0",buff, sizeof(buff), m_statusFileName.c_str());
-	// 	int microliters=(VersaSampleType)atoi(buff);
-	// 	m_CurrentStatus.SampleVolume_ml = (float)microliters/(float)1000.0;//Convert to ml
+	Current.delaySeconds1 = (VersaSampleType)atoi(buff);
 
 	GetPrivateProfileString("Status", "Sample", "0", buff, sizeof(buff), m_statusFileName.c_str());
 	int microliters = (VersaSampleType)atoi(buff);
-	m_CurrentStatus.SampleVolume_ml = (float)microliters / (float)1000.0;//Convert to ml
+	Current.SampleVolume_ml = (float)microliters / (float)1000.0;//Convert to ml
 
 
 	GetPrivateProfileString("Status", "DelaySeconds2", "0", buff, sizeof(buff), m_statusFileName.c_str());
-	m_CurrentStatus.delaySeconds2 = (VersaSampleType)atoi(buff);
-
-
-	m_EditStatus.SetWindowText(GetShortStatus().c_str());
-	m_EditSampleType.SetWindowText(GetSampleType().c_str());
-	
-	m_EditPlateWell.SetWindowText(m_CurrentStatus.plateWell.c_str());
-	m_EditBarCode.SetWindowText(m_CurrentStatus.barcode.c_str());
-	m_EditDelaySeconds1.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds1).c_str());
-	m_EditSampleId.SetWindowText(m_CurrentStatus.sampleID.c_str());
-	m_EditSample.SetWindowText(std::to_string(m_CurrentStatus.SampleVolume_ml).c_str());
-	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
-
-	
-
-
+	Current.delaySeconds2 = (VersaSampleType)atoi(buff);
 }
+
+
 /**
 * FUNCTION workingThread
 *
@@ -321,6 +315,7 @@ void CAutoPilotIniDlg::writeCurrentStatus()
 
 	sprintf_s(Nubuff, sizeof(Nubuff), "%d", m_CurrentStatus.delaySeconds2);
 	WritePrivateProfileString("Status", "DelaySeconds2", Nubuff, m_statusFileName.c_str());
+	UpdateStatus();
 
 
 }
@@ -399,4 +394,133 @@ std::string CAutoPilotIniDlg::GetSampleType()
 	ret += " )";
 
 	return ret;
+}
+
+
+void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+	
+	PURGE_TIMER;
+
+	switch (nIDEvent)
+	{
+		case PURGE_TIMER: 
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(PURGE_TIMER);
+				m_CurrentStatus.status = VERSA_STATUS_FLOWCAM_READY;
+				writeCurrentStatus();
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case SAMPLE_TIMER:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(SAMPLE_TIMER);
+				m_StatusText.SetWindowText("Purging Flowcell");
+				SetTimer(PURGE_TIMER, 1000, NULL);
+				m_CountDown = COUNT_DOWN_SECONDS;
+				m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+				writeCurrentStatus();
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case RINSE_TIMER:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(RINSE_TIMER);
+				m_StatusText.SetWindowText("Purging Flowcell");
+				SetTimer(PURGE_TIMER, 1000, NULL);
+				m_CountDown = COUNT_DOWN_SECONDS;
+				m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+				writeCurrentStatus();
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case EOD_TIMER:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(EOD_TIMER);
+				m_StatusText.SetWindowText("flooding Flowcell");
+				m_CurrentStatus.status = VERSA_STATUS_FLOWCAM_READY;
+				writeCurrentStatus();
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+
+	}
+
+
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CAutoPilotIniDlg::UpdateStatus()
+{
+	m_EditStatus.SetWindowText(GetShortStatus().c_str());
+	m_EditSampleType.SetWindowText(GetSampleType().c_str());
+	m_EditPlateWell.SetWindowText(m_CurrentStatus.plateWell.c_str());
+	m_EditBarCode.SetWindowText(m_CurrentStatus.barcode.c_str());
+	m_EditDelaySeconds1.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds1).c_str());
+	m_EditSampleId.SetWindowText(m_CurrentStatus.sampleID.c_str());
+	m_EditSample.SetWindowText(std::to_string(m_CurrentStatus.SampleVolume_ml).c_str());
+	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
+
+	if (m_CurrentStatus.status == VERSA_VISUAL_START_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	{
+		m_StatusText.SetWindowText("Purging Flowcell");
+		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		writeCurrentStatus();
+		SetTimer(PURGE_TIMER, 1000,NULL );
+		m_CountDown = COUNT_DOWN_SECONDS;
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_STANDARD)
+	{
+		m_StatusText.SetWindowText("Processing Sample");
+		SetTimer(SAMPLE_TIMER, 1000, NULL);
+		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		writeCurrentStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_CLEAN)
+	{
+		m_StatusText.SetWindowText("Wash / Rinse Flowcell");
+		SetTimer(RINSE_TIMER, 1000, NULL);
+		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		writeCurrentStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	{
+		m_StatusText.SetWindowText("Flood Flowcell End Of Day");
+		SetTimer(EOD_TIMER, 1000, NULL);
+		m_CountDown = COUNT_DOWN_SECONDS;
+		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		writeCurrentStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_VISUAL_END_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	{
+		m_StatusText.SetWindowText("End of run Flooded Flowcell");
+		//UpdateStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY )
+	{
+		m_StatusText.SetWindowText("Ready For Next Sample");
+		//UpdateStatus();
+	}
+
+	m_EditCountDown.SetWindowText(std::to_string(m_CountDown).c_str());
 }

@@ -153,6 +153,7 @@ private:
 	
 	std::string m_statusFileName;
 	VersaIniData m_CurrentStatus;
+	int m_CountDown;
 
 	void workingThread();
 	bool stopWorkingThread();
@@ -167,9 +168,16 @@ private:
 	//! the current ini file metadata ( Last write time etc)
 	std::unique_ptr<FileInformation> m_pFileInformation;
 	void theFileChanged();
-	void readCurrentStatus();
+	void readCurrentStatus(VersaIniData &Current);
+
+	void UpdateStatus();
+
 	void writeCurrentStatus();
 	std::string GetShortStatus();
 	std::string GetSampleType();
 
+public:
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	CStatic m_StatusText;
+	CEdit m_EditCountDown;
 };
