@@ -154,6 +154,7 @@ private:
 	std::string m_statusFileName;
 	std::string m_LocalIni;
 	int m_TimeoutAmount;
+	int m_AlhCurrentStep;
 
 	VersaIniData m_CurrentStatus;
 	int m_CountDown;
@@ -173,7 +174,13 @@ private:
 	void theFileChanged();
 	void readCurrentStatus(VersaIniData &Current);
 
+	bool m_logicFlowcam;
+
 	void UpdateStatus();
+
+	void AlhLogic();
+
+	void FlowcamLogic();
 
 	void writeCurrentStatus();
 	std::string GetShortStatus();
@@ -186,8 +193,12 @@ public:
 	CEdit m_Edit_StatusIni;
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnClose();
-	afx_msg void OnEnChangeEditStatusIni();
 	afx_msg void OnBnClickedButtonOpen();
 	CButton m_ButtonOpen;
+	afx_msg void OnBnClickedRadioLogicFlow();
+	afx_msg void OnBnClickedRadioLogicAlh();
+	afx_msg void OnBnClickedButtonAlhStart();
+	CButton m_ButtonALHStart;
+	CStatic m_GroupBoxMode;
 };
 void StdStringExtractPathFileExt(const std::string &FullString, std::string &Filename, std::string &Path, std::string &Ext);

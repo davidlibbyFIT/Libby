@@ -16,6 +16,15 @@
 #define PURGE_TIMER 1002
 #define SAMPLE_TIMER 1003
 #define EOD_TIMER 1004
+
+#define ALH_START_OF_DAY 1005
+#define ALH_END_OF_DAY 1006
+#define ALH_PREP_SAMPLE 1007
+#define ALH_CLEAN_SAMPLE 1008
+#define ALH_RINSE_SAMPLE 1009
+#define ALH_SWITCH_TO_FLOOD 1010
+
+
 #define COUNT_DOWN_SECONDS 10
 
 // CAboutDlg dialog used for App About
@@ -63,6 +72,8 @@ CAutoPilotIniDlg::CAutoPilotIniDlg(CWnd* pParent /*=NULL*/)
 	m_pFileInformation.reset(new FileInformation(m_statusFileName.c_str()));
 	m_TimeoutAmount = COUNT_DOWN_SECONDS;
 
+	m_logicFlowcam = true;
+
 	CHAR path[MAX_PATH];
 	GetModuleFileName(NULL, path, MAX_PATH);
 	std::string Filename, Ext;
@@ -90,6 +101,8 @@ void CAutoPilotIniDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, EDIT_COUNT, m_EditCountDown);
 	DDX_Control(pDX, IDC_EDIT_STATUS_INI, m_Edit_StatusIni);
 	DDX_Control(pDX, IDC_BUTTON_OPEN, m_ButtonOpen);
+	DDX_Control(pDX, IDC_BUTTON_ALH_START, m_ButtonALHStart);
+	DDX_Control(pDX, IDC_STATIC_MODE, m_GroupBoxMode);
 }
 
 BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
@@ -99,8 +112,10 @@ BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDOK, &CAutoPilotIniDlg::OnBnClickedOk)
 	ON_WM_CLOSE()
-	ON_EN_CHANGE(IDC_EDIT_STATUS_INI, &CAutoPilotIniDlg::OnEnChangeEditStatusIni)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CAutoPilotIniDlg::OnBnClickedButtonOpen)
+	ON_BN_CLICKED(IDC_RADIO_LOGIC_FLOW, &CAutoPilotIniDlg::OnBnClickedRadioLogicFlow)
+	ON_BN_CLICKED(IDC_RADIO_LOGIC_ALH, &CAutoPilotIniDlg::OnBnClickedRadioLogicAlh)
+	ON_BN_CLICKED(IDC_BUTTON_ALH_START, &CAutoPilotIniDlg::OnBnClickedButtonAlhStart)
 END_MESSAGE_MAP()
 
 
@@ -254,6 +269,15 @@ void CAutoPilotIniDlg::readCurrentStatus(VersaIniData &Current)
 	GetPrivateProfileString("TimeOut", "Seconds", std::to_string(m_TimeoutAmount).c_str(), buff, sizeof(buff), m_LocalIni.c_str());
 	m_TimeoutAmount = atoi(buff);
 
+	GetPrivateProfileString("SimulateType", "FlowcamBool", "1", buff, sizeof(buff), m_LocalIni.c_str());
+	if (atoi(buff) == 1)
+	{
+		m_logicFlowcam = true;
+	}
+	else 
+	{
+		m_logicFlowcam = false;
+	}
 
 
 	GetPrivateProfileString("Status", "Status", "0", buff, sizeof(buff), m_statusFileName.c_str());
@@ -323,6 +347,12 @@ void CAutoPilotIniDlg::writeCurrentStatus()
 	WritePrivateProfileString("TimeOut", "Seconds", std::to_string(m_TimeoutAmount).c_str(), m_LocalIni.c_str());
 	WritePrivateProfileString("StatusFile", "Location", m_statusFileName.c_str(), m_LocalIni.c_str());
 
+	if(m_logicFlowcam)
+		sprintf_s(Nubuff, sizeof(Nubuff), "%d", 1);
+	else
+		sprintf_s(Nubuff, sizeof(Nubuff), "%d", 0);
+	WritePrivateProfileString("SimulateType", "FlowcamBool", Nubuff, m_LocalIni.c_str());
+
 	sprintf_s(Nubuff, sizeof(Nubuff), "%d", m_CurrentStatus.status);
 	WritePrivateProfileString("Status", "Status", Nubuff, m_statusFileName.c_str());
 
@@ -373,7 +403,7 @@ std::string CAutoPilotIniDlg::GetShortStatus()
 		ret += "VERSA_STATUS_SAMPLE_READY";
 		break;
 	case VERSA_STATUS_START_IMAGING:
-		ret += "VERSA_STATUS_START_IMAGING";
+		ret += "Running";
 		break;
 	case VERSA_STATUS_FLOWCAM_READY:
 		ret += "VERSA_STATUS_FLOWCAM_READY";
@@ -454,7 +484,7 @@ void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
 				m_StatusText.SetWindowText("Purging Flowcell");
 				SetTimer(PURGE_TIMER, 1000, NULL);
 				m_CountDown = m_TimeoutAmount;
-				m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+				m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
 				writeCurrentStatus();
 			}
 			UpdateStatus();
@@ -469,7 +499,7 @@ void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
 				m_StatusText.SetWindowText("Purging Flowcell");
 				SetTimer(PURGE_TIMER, 1000, NULL);
 				m_CountDown = m_TimeoutAmount;
-				m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+				m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
 				writeCurrentStatus();
 			}
 			UpdateStatus();
@@ -490,6 +520,94 @@ void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
 			break;
 		}
 
+		case ALH_START_OF_DAY:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(ALH_START_OF_DAY);
+				m_StatusText.SetWindowText("Flowcell flooded");
+				//Sleep(3000);
+				m_CurrentStatus.status = VERSA_VISUAL_START_OF_DAY;
+				m_CurrentStatus.sampleType = VERSA_SAMPLE_END_OF_DAY;
+				m_ButtonOpen.EnableWindow(1);
+				writeCurrentStatus();
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case ALH_PREP_SAMPLE:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(ALH_PREP_SAMPLE);
+				m_StatusText.SetWindowText("Sample Injected");
+				//Sleep(3000);
+				m_CurrentStatus.status = VERSA_STATUS_SAMPLE_READY;
+				writeCurrentStatus();
+				m_AlhCurrentStep++;
+				m_ButtonOpen.EnableWindow(1);
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case ALH_CLEAN_SAMPLE:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(ALH_CLEAN_SAMPLE);
+				m_StatusText.SetWindowText("Cleaner Injected");
+				//Sleep(3000);
+				m_CurrentStatus.status = VERSA_STATUS_SAMPLE_READY;
+				m_CurrentStatus.sampleType = VERSA_SAMPLE_CLEAN;
+				writeCurrentStatus();
+				m_AlhCurrentStep++;
+				m_ButtonOpen.EnableWindow(1);
+
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case ALH_RINSE_SAMPLE:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(ALH_RINSE_SAMPLE);
+				m_StatusText.SetWindowText("Rinse Injected");
+				//Sleep(3000);
+				m_CurrentStatus.status = VERSA_STATUS_SAMPLE_READY;
+				writeCurrentStatus();
+				m_AlhCurrentStep++;
+				m_ButtonOpen.EnableWindow(1);
+
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		case ALH_SWITCH_TO_FLOOD:
+		{
+			if (m_CountDown <= 0)
+			{
+				KillTimer(ALH_SWITCH_TO_FLOOD);
+				m_StatusText.SetWindowText("Rinse Injected");
+				//Sleep(3000);
+				m_CurrentStatus.status = VERSA_STATUS_SAMPLE_READY;
+				//VERSA_STATUS_SAMPLE_READY
+				writeCurrentStatus();
+				m_AlhCurrentStep++;
+				m_ButtonOpen.EnableWindow(1);
+
+			}
+			UpdateStatus();
+			m_CountDown--;
+			break;
+		}
+		
+
+
 	}
 
 
@@ -497,69 +615,75 @@ void CAutoPilotIniDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-void CAutoPilotIniDlg::UpdateStatus()
+
+void CAutoPilotIniDlg::AlhLogic()
 {
-	m_EditStatus.SetWindowText(GetShortStatus().c_str());
-	m_EditSampleType.SetWindowText(GetSampleType().c_str());
-	m_EditPlateWell.SetWindowText(m_CurrentStatus.plateWell.c_str());
-	m_EditBarCode.SetWindowText(m_CurrentStatus.barcode.c_str());
-	m_EditDelaySeconds1.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds1).c_str());
-	m_EditSampleId.SetWindowText(m_CurrentStatus.sampleID.c_str());
-	m_EditSample.SetWindowText(std::to_string(m_CurrentStatus.SampleVolume_ml).c_str());
-	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
-	m_Edit_StatusIni.SetWindowText(m_statusFileName.c_str());
-
-
-	if (m_CurrentStatus.status == VERSA_VISUAL_START_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	
+	if (m_CurrentStatus.status == VERSA_VISUAL_END_OF_DAY|| m_CurrentStatus.status == VERSA_STATUS_IDLE)
 	{
-		m_StatusText.SetWindowText("Purging Flowcell");
-		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
-		writeCurrentStatus();
-		SetTimer(PURGE_TIMER, 1000,NULL );
-		m_CountDown = m_TimeoutAmount;
-		m_ButtonOpen.EnableWindow(0);
-
+		m_ButtonALHStart.EnableWindow(TRUE);
 	}
-	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_STANDARD)
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY && m_AlhCurrentStep == 0) // Setup Run Of Sample
 	{
-		m_StatusText.SetWindowText("Processing Sample");
-		SetTimer(SAMPLE_TIMER, 1000, NULL);
+		m_StatusText.SetWindowText("Creating Sample");
+		SetTimer(ALH_PREP_SAMPLE, 1000, NULL);
 		m_CountDown = m_TimeoutAmount;
 		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_CurrentStatus.sampleType = VERSA_SAMPLE_STANDARD;
 		m_ButtonOpen.EnableWindow(0);
 		writeCurrentStatus();
+		m_ButtonALHStart.EnableWindow(FALSE);
 	}
-	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_CLEAN)
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY && m_AlhCurrentStep == 1) // Setup Clean Solution
 	{
-		m_StatusText.SetWindowText("Wash / Rinse Flowcell");
-		SetTimer(RINSE_TIMER, 1000, NULL);
+		m_StatusText.SetWindowText("Getting Clean Solution");
+		SetTimer(ALH_CLEAN_SAMPLE, 1000, NULL);
 		m_CountDown = m_TimeoutAmount;
-		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_CurrentStatus.sampleType = VERSA_SAMPLE_CLEAN;
+		m_ButtonALHStart.EnableWindow(FALSE);
 		m_ButtonOpen.EnableWindow(0);
 		writeCurrentStatus();
 	}
-	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY && m_AlhCurrentStep == 2) // Setup Rinse Solution
 	{
-		m_StatusText.SetWindowText("Flood Flowcell End Of Day");
-		SetTimer(EOD_TIMER, 1000, NULL);
+		m_StatusText.SetWindowText("Getting Rinse Solution");
+		SetTimer(ALH_RINSE_SAMPLE, 1000, NULL);
 		m_CountDown = m_TimeoutAmount;
-		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_CurrentStatus.sampleType = VERSA_SAMPLE_CLEAN;
+		m_ButtonALHStart.EnableWindow(FALSE);
 		m_ButtonOpen.EnableWindow(0);
 		writeCurrentStatus();
 	}
-	else if (m_CurrentStatus.status == VERSA_VISUAL_END_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY && m_AlhCurrentStep == 3) // Setup Rinse Solution
 	{
-		m_StatusText.SetWindowText("End of run Flooded Flowcell");
-		//UpdateStatus();
+		m_StatusText.SetWindowText("Getting End Of Day Solution");
+		SetTimer(ALH_SWITCH_TO_FLOOD, 1000, NULL);
+		m_CountDown = m_TimeoutAmount;
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_CurrentStatus.sampleType = VERSA_SAMPLE_END_OF_DAY;
+		m_ButtonALHStart.EnableWindow(TRUE);
+		m_ButtonOpen.EnableWindow(0);
+		writeCurrentStatus();
 	}
-	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY )
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY && m_AlhCurrentStep >= 4) // Setup Rinse Solution
 	{
-		m_StatusText.SetWindowText("Ready For Next Sample");
+		m_StatusText.SetWindowText("Rinse Injected Set Flag");
+		//Sleep(3000);
+		m_CurrentStatus.status = VERSA_VISUAL_END_OF_DAY;
+		//VERSA_STATUS_SAMPLE_READY
+		writeCurrentStatus();
+		m_AlhCurrentStep++;
 		m_ButtonOpen.EnableWindow(1);
 	}
 
-	m_EditCountDown.SetWindowText(std::to_string(m_CountDown).c_str());
+	
+
+
 }
+
+
 void StdStringExtractPathFileExt(const std::string &FullString, std::string &Filename, std::string &Path, std::string &Ext)
 {
 	Filename = Path = FullString;
@@ -600,18 +724,134 @@ void CAutoPilotIniDlg::OnClose()
 }
 
 
-void CAutoPilotIniDlg::OnEnChangeEditStatusIni()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CDialogEx::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
-}
-
 
 void CAutoPilotIniDlg::OnBnClickedButtonOpen()
 {
 	HINSTANCE ff= ShellExecute(0, "open", "notepad", m_statusFileName.c_str(), 0, SW_SHOW);
+}
+
+
+void CAutoPilotIniDlg::OnBnClickedRadioLogicFlow()
+{
+	// TODO: Add your control notification handler code here
+	m_logicFlowcam = true;
+	writeCurrentStatus();
+
+}
+
+
+void CAutoPilotIniDlg::OnBnClickedRadioLogicAlh()
+{
+	// TODO: Add your control notification handler code here
+	m_logicFlowcam = false;
+	writeCurrentStatus();
+}
+void CAutoPilotIniDlg::UpdateStatus()
+{
+	m_EditStatus.SetWindowText(GetShortStatus().c_str());
+	m_EditSampleType.SetWindowText(GetSampleType().c_str());
+	m_EditPlateWell.SetWindowText(m_CurrentStatus.plateWell.c_str());
+	m_EditBarCode.SetWindowText(m_CurrentStatus.barcode.c_str());
+	m_EditDelaySeconds1.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds1).c_str());
+	m_EditSampleId.SetWindowText(m_CurrentStatus.sampleID.c_str());
+	m_EditSample.SetWindowText(std::to_string(m_CurrentStatus.SampleVolume_ml).c_str());
+	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
+	m_Edit_StatusIni.SetWindowText(m_statusFileName.c_str());
+
+	if (m_logicFlowcam)
+	{
+		GetDlgItem(IDC_RADIO_LOGIC_FLOW)->SendMessage(BM_SETCHECK, BST_CHECKED, 0);
+		GetDlgItem(IDC_RADIO_LOGIC_ALH)->SendMessage(BM_SETCHECK, BST_UNCHECKED, 0);
+
+		m_ButtonALHStart.EnableWindow(FALSE);
+		m_ButtonALHStart.ShowWindow(SW_HIDE);
+		m_GroupBoxMode.SetWindowText("FlowCam Mode");
+		this->SetWindowText("FlowCam Simulator");
+	}
+	else
+	{
+		GetDlgItem(IDC_RADIO_LOGIC_FLOW)->SendMessage(BM_SETCHECK, BST_UNCHECKED, 0);
+		GetDlgItem(IDC_RADIO_LOGIC_ALH)->SendMessage(BM_SETCHECK, BST_CHECKED, 0);
+		m_GroupBoxMode.SetWindowText("ALH Mode");
+		this->SetWindowText("ALH Simulator");
+
+		m_ButtonALHStart.EnableWindow(FALSE);
+		m_ButtonALHStart.ShowWindow(SW_SHOW);
+
+	}
+
+	if (m_logicFlowcam)
+	{
+		FlowcamLogic();
+	}
+	else
+	{
+		AlhLogic();
+
+	}
+
+	m_EditCountDown.SetWindowText(std::to_string(m_CountDown).c_str());
+}
+void CAutoPilotIniDlg::FlowcamLogic()
+{
+	if (m_CurrentStatus.status == VERSA_VISUAL_START_OF_DAY)
+	{
+		m_StatusText.SetWindowText("Purging Flowcell");
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		writeCurrentStatus();
+		SetTimer(PURGE_TIMER, 1000, NULL);
+		m_CountDown = m_TimeoutAmount;
+		m_ButtonOpen.EnableWindow(0);
+
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_STANDARD)
+	{
+		m_StatusText.SetWindowText("Processing Sample");
+		SetTimer(SAMPLE_TIMER, 1000, NULL);
+		m_CountDown = m_TimeoutAmount;
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_ButtonOpen.EnableWindow(0);
+		writeCurrentStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_CLEAN)
+	{
+		m_StatusText.SetWindowText("Wash / Rinse Flowcell");
+		SetTimer(RINSE_TIMER, 1000, NULL);
+		m_CountDown = m_TimeoutAmount;
+		m_CurrentStatus.status = VERSA_VISUAL_CLEANING;
+		m_ButtonOpen.EnableWindow(0);
+		writeCurrentStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_SAMPLE_READY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	{
+		m_StatusText.SetWindowText("Flood Flowcell End Of Day");
+		SetTimer(EOD_TIMER, 1000, NULL);
+		m_CountDown = m_TimeoutAmount;
+		m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+		m_ButtonOpen.EnableWindow(0);
+		writeCurrentStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_VISUAL_END_OF_DAY && m_CurrentStatus.sampleType == VERSA_SAMPLE_END_OF_DAY)
+	{
+		m_StatusText.SetWindowText("End of run Flooded Flowcell");
+		//UpdateStatus();
+	}
+	else if (m_CurrentStatus.status == VERSA_STATUS_FLOWCAM_READY)
+	{
+		m_StatusText.SetWindowText("Ready For Next Sample");
+		m_ButtonOpen.EnableWindow(1);
+	}
+}
+
+
+void CAutoPilotIniDlg::OnBnClickedButtonAlhStart()
+{	
+	m_StatusText.SetWindowText("Start Run");
+	m_CurrentStatus.status = VERSA_STATUS_START_IMAGING;
+	m_CurrentStatus.sampleType = VERSA_SAMPLE_END_OF_DAY;
+	writeCurrentStatus();
+	SetTimer(ALH_START_OF_DAY, 1000, NULL);
+	m_CountDown = m_TimeoutAmount;
+	m_ButtonOpen.EnableWindow(0);
+	m_AlhCurrentStep = 0;
 }
