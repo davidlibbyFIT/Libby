@@ -22,6 +22,7 @@ enum VersaStatus
 	, VERSA_VISUAL_CLEANING = 7
 	, VERSA_VISUAL_END_OF_DAY = 8
 	, VERSA_VISUAL_START_OF_DAY = 9
+	, VERSA_STATUS_NOOP = 999
 };
 
 enum VersaSampleType

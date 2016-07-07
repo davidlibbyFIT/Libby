@@ -424,6 +424,10 @@ std::string CAutoPilotIniDlg::GetShortStatus()
 		ret += "VERSA_VISUAL_START_OF_DAY";
 		break;
 
+	case VERSA_STATUS_NOOP:
+		ret += "Versa Working";
+		break;
+
 	}
 
 	ret += " )";
