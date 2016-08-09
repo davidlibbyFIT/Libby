@@ -72,7 +72,9 @@ CAutoPilotIniDlg::CAutoPilotIniDlg(CWnd* pParent /*=NULL*/)
 	m_pFileInformation.reset(new FileInformation(m_statusFileName.c_str()));
 	m_TimeoutAmount = COUNT_DOWN_SECONDS;
 
-	m_logicFlowcam = true;
+	//MessageBox(m_statusFileName.c_str(), __FUNCTION__, 0);
+
+	m_logicFlowcam = AP_RUN_MODE_NOOP;
 
 	CHAR path[MAX_PATH];
 	GetModuleFileName(NULL, path, MAX_PATH);
@@ -116,6 +118,7 @@ BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_LOGIC_FLOW, &CAutoPilotIniDlg::OnBnClickedRadioLogicFlow)
 	ON_BN_CLICKED(IDC_RADIO_LOGIC_ALH, &CAutoPilotIniDlg::OnBnClickedRadioLogicAlh)
 	ON_BN_CLICKED(IDC_BUTTON_ALH_START, &CAutoPilotIniDlg::OnBnClickedButtonAlhStart)
+	ON_BN_CLICKED(IDC_RADIO_LOGIC_NOOP, &CAutoPilotIniDlg::OnBnClickedRadioLogicNoop)
 END_MESSAGE_MAP()
 
 
@@ -251,6 +254,14 @@ void CAutoPilotIniDlg::theFileChanged()
 {
 	static VersaIniData Current;
 	readCurrentStatus(Current);
+	static bool firstTime = true;
+
+	if (firstTime) 
+	{
+		m_CurrentStatus = Current;
+		UpdateStatus();
+	}
+
 	if (Current != m_CurrentStatus) 
 	{
 		m_CurrentStatus = Current;
@@ -262,22 +273,17 @@ void CAutoPilotIniDlg::theFileChanged()
 void CAutoPilotIniDlg::readCurrentStatus(VersaIniData &Current)
 {
 	char buff[255] = { 0 };
+	//MessageBox(m_LocalIni.c_str(),"Pre " __FUNCTION__, 0);
 
 	GetPrivateProfileString("StatusFile", "Location", m_statusFileName.c_str(), buff, sizeof(buff), m_LocalIni.c_str());
 	m_statusFileName = buff;
+	//MessageBox(m_LocalIni.c_str(), "Post " __FUNCTION__, 0);
 
 	GetPrivateProfileString("TimeOut", "Seconds", std::to_string(m_TimeoutAmount).c_str(), buff, sizeof(buff), m_LocalIni.c_str());
 	m_TimeoutAmount = atoi(buff);
 
-	GetPrivateProfileString("SimulateType", "FlowcamBool", "1", buff, sizeof(buff), m_LocalIni.c_str());
-	if (atoi(buff) == 1)
-	{
-		m_logicFlowcam = true;
-	}
-	else 
-	{
-		m_logicFlowcam = false;
-	}
+	GetPrivateProfileString("SimulateType", "FlowcamBool", "2", buff, sizeof(buff), m_LocalIni.c_str());
+	m_logicFlowcam = (RunMode)atoi(buff);
 
 
 	GetPrivateProfileString("Status", "Status", "0", buff, sizeof(buff), m_statusFileName.c_str());
@@ -333,26 +339,31 @@ void CAutoPilotIniDlg::workingThread()
 			theFileChanged();
 	}
 }
-void CAutoPilotIniDlg::writeCurrentStatus()
+void CAutoPilotIniDlg::writeCurrentStatus(bool Update /*= true*/)
 {
 	char Nubuff[255] = { 0 };
 
 	CString rstrString;
 	m_Edit_StatusIni.GetWindowText(rstrString);
 	std::string WinText = rstrString;
-	if (WinText != m_statusFileName)
+	
+	//MessageBox(m_LocalIni.c_str(), "Pre " __FUNCTION__, 0);
+	if (WinText.length()>0 && WinText != m_statusFileName)
 	{
 		m_statusFileName = WinText;
+		//MessageBox(m_LocalIni.c_str(), "Change " __FUNCTION__, 0);
+
 	}
 	WritePrivateProfileString("TimeOut", "Seconds", std::to_string(m_TimeoutAmount).c_str(), m_LocalIni.c_str());
 	WritePrivateProfileString("StatusFile", "Location", m_statusFileName.c_str(), m_LocalIni.c_str());
 
-	if(m_logicFlowcam)
-		sprintf_s(Nubuff, sizeof(Nubuff), "%d", 1);
-	else
-		sprintf_s(Nubuff, sizeof(Nubuff), "%d", 0);
-	WritePrivateProfileString("SimulateType", "FlowcamBool", Nubuff, m_LocalIni.c_str());
+	sprintf_s(Nubuff, sizeof(Nubuff), "%d", m_logicFlowcam);
 
+	WritePrivateProfileString("SimulateType", "FlowcamBool", Nubuff, m_LocalIni.c_str());
+	
+	if (m_logicFlowcam == AP_RUN_MODE_NOOP)
+		return;
+	
 	sprintf_s(Nubuff, sizeof(Nubuff), "%d", m_CurrentStatus.status);
 	WritePrivateProfileString("Status", "Status", Nubuff, m_statusFileName.c_str());
 
@@ -380,8 +391,8 @@ void CAutoPilotIniDlg::writeCurrentStatus()
 	WritePrivateProfileString("Status", "DelaySeconds2", Nubuff, m_statusFileName.c_str());
 
 
-	
-	UpdateStatus();
+	if(Update)
+		UpdateStatus();
 
 
 }
@@ -738,7 +749,7 @@ void CAutoPilotIniDlg::OnBnClickedButtonOpen()
 void CAutoPilotIniDlg::OnBnClickedRadioLogicFlow()
 {
 	// TODO: Add your control notification handler code here
-	m_logicFlowcam = true;
+	m_logicFlowcam = AP_RUN_MODE_FLOWCAM;
 	writeCurrentStatus();
 
 }
@@ -747,11 +758,12 @@ void CAutoPilotIniDlg::OnBnClickedRadioLogicFlow()
 void CAutoPilotIniDlg::OnBnClickedRadioLogicAlh()
 {
 	// TODO: Add your control notification handler code here
-	m_logicFlowcam = false;
+	m_logicFlowcam = AP_RUN_MODE_ALH;
 	writeCurrentStatus();
 }
 void CAutoPilotIniDlg::UpdateStatus()
 {
+	
 	m_EditStatus.SetWindowText(GetShortStatus().c_str());
 	m_EditSampleType.SetWindowText(GetSampleType().c_str());
 	m_EditPlateWell.SetWindowText(m_CurrentStatus.plateWell.c_str());
@@ -762,7 +774,7 @@ void CAutoPilotIniDlg::UpdateStatus()
 	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
 	m_Edit_StatusIni.SetWindowText(m_statusFileName.c_str());
 
-	if (m_logicFlowcam)
+	if (m_logicFlowcam == AP_RUN_MODE_FLOWCAM)
 	{
 		GetDlgItem(IDC_RADIO_LOGIC_FLOW)->SendMessage(BM_SETCHECK, BST_CHECKED, 0);
 		GetDlgItem(IDC_RADIO_LOGIC_ALH)->SendMessage(BM_SETCHECK, BST_UNCHECKED, 0);
@@ -772,7 +784,7 @@ void CAutoPilotIniDlg::UpdateStatus()
 		m_GroupBoxMode.SetWindowText("FlowCam Mode");
 		this->SetWindowText("FlowCam Simulator");
 	}
-	else
+	if (m_logicFlowcam == AP_RUN_MODE_ALH)
 	{
 		GetDlgItem(IDC_RADIO_LOGIC_FLOW)->SendMessage(BM_SETCHECK, BST_UNCHECKED, 0);
 		GetDlgItem(IDC_RADIO_LOGIC_ALH)->SendMessage(BM_SETCHECK, BST_CHECKED, 0);
@@ -784,14 +796,36 @@ void CAutoPilotIniDlg::UpdateStatus()
 
 	}
 
-	if (m_logicFlowcam)
+	if (m_logicFlowcam == AP_RUN_MODE_NOOP)
+	{
+		GetDlgItem(IDC_RADIO_LOGIC_NOOP)->SendMessage(BM_SETCHECK, BST_CHECKED, 0);
+		GetDlgItem(IDC_RADIO_LOGIC_ALH)->SendMessage(BM_SETCHECK, BST_UNCHECKED, 0);
+		GetDlgItem(IDC_RADIO_LOGIC_FLOW)->SendMessage(BM_SETCHECK, BST_UNCHECKED, 0);
+		m_ButtonALHStart.EnableWindow(FALSE);
+		m_ButtonALHStart.ShowWindow(SW_HIDE);
+
+		m_GroupBoxMode.SetWindowText("View Only Mode");
+		this->SetWindowText("View Ini File");
+
+		m_ButtonALHStart.EnableWindow(FALSE);
+		m_ButtonALHStart.ShowWindow(SW_SHOW);
+
+	}
+
+
+	if (m_logicFlowcam == AP_RUN_MODE_FLOWCAM)
 	{
 		FlowcamLogic();
 	}
-	else
+	if (m_logicFlowcam == AP_RUN_MODE_ALH)
 	{
 		AlhLogic();
+	}
 
+	if (m_logicFlowcam == AP_RUN_MODE_NOOP)
+	{
+		writeCurrentStatus(false);
+		return;
 	}
 
 	m_EditCountDown.SetWindowText(std::to_string(m_CountDown).c_str());
@@ -858,4 +892,12 @@ void CAutoPilotIniDlg::OnBnClickedButtonAlhStart()
 	m_CountDown = m_TimeoutAmount;
 	m_ButtonOpen.EnableWindow(0);
 	m_AlhCurrentStep = 0;
+}
+
+
+void CAutoPilotIniDlg::OnBnClickedRadioLogicNoop()
+{
+	m_logicFlowcam = AP_RUN_MODE_NOOP;
+	writeCurrentStatus();
+
 }

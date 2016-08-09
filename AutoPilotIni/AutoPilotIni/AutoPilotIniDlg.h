@@ -25,6 +25,13 @@ enum VersaStatus
 	, VERSA_STATUS_NOOP = 999
 };
 
+enum RunMode
+{
+	  AP_RUN_MODE_ALH
+	, AP_RUN_MODE_FLOWCAM
+	, AP_RUN_MODE_NOOP 
+};
+
 enum VersaSampleType
 {
 	VERSA_SAMPLE_STANDARD = 0
@@ -175,7 +182,7 @@ private:
 	void theFileChanged();
 	void readCurrentStatus(VersaIniData &Current);
 
-	bool m_logicFlowcam;
+	RunMode m_logicFlowcam;
 
 	void UpdateStatus();
 
@@ -183,7 +190,7 @@ private:
 
 	void FlowcamLogic();
 
-	void writeCurrentStatus();
+	void writeCurrentStatus(bool Update = true);
 	std::string GetShortStatus();
 	std::string GetSampleType();
 
@@ -201,5 +208,6 @@ public:
 	afx_msg void OnBnClickedButtonAlhStart();
 	CButton m_ButtonALHStart;
 	CStatic m_GroupBoxMode;
+	afx_msg void OnBnClickedRadioLogicNoop();
 };
 void StdStringExtractPathFileExt(const std::string &FullString, std::string &Filename, std::string &Path, std::string &Ext);
