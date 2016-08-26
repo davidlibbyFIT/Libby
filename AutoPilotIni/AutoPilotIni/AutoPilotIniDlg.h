@@ -186,13 +186,17 @@ private:
 
 	void UpdateStatus();
 
+	void WriteHistory(VersaIniData &CurStatus);
+
 	void AlhLogic();
 
 	void FlowcamLogic();
 
 	void writeCurrentStatus(bool Update = true);
 	std::string GetShortStatus();
+	std::string GetShortStatus(VersaIniData &CurStatus);
 	std::string GetSampleType();
+	std::string GetSampleType(VersaIniData &CurStatus);
 
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -209,5 +213,7 @@ public:
 	CButton m_ButtonALHStart;
 	CStatic m_GroupBoxMode;
 	afx_msg void OnBnClickedRadioLogicNoop();
+	CListBox m_History;
+	afx_msg void OnBnClickedButtonClear();
 };
 void StdStringExtractPathFileExt(const std::string &FullString, std::string &Filename, std::string &Path, std::string &Ext);

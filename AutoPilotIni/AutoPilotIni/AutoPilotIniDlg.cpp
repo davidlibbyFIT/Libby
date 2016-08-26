@@ -105,6 +105,7 @@ void CAutoPilotIniDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_OPEN, m_ButtonOpen);
 	DDX_Control(pDX, IDC_BUTTON_ALH_START, m_ButtonALHStart);
 	DDX_Control(pDX, IDC_STATIC_MODE, m_GroupBoxMode);
+	DDX_Control(pDX, IDC_LIST1, m_History);
 }
 
 BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
@@ -119,6 +120,7 @@ BEGIN_MESSAGE_MAP(CAutoPilotIniDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_LOGIC_ALH, &CAutoPilotIniDlg::OnBnClickedRadioLogicAlh)
 	ON_BN_CLICKED(IDC_BUTTON_ALH_START, &CAutoPilotIniDlg::OnBnClickedButtonAlhStart)
 	ON_BN_CLICKED(IDC_RADIO_LOGIC_NOOP, &CAutoPilotIniDlg::OnBnClickedRadioLogicNoop)
+	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CAutoPilotIniDlg::OnBnClickedButtonClear)
 END_MESSAGE_MAP()
 
 
@@ -256,10 +258,13 @@ void CAutoPilotIniDlg::theFileChanged()
 	readCurrentStatus(Current);
 	static bool firstTime = true;
 
+	WriteHistory(Current);
+
 	if (firstTime) 
 	{
 		m_CurrentStatus = Current;
 		UpdateStatus();
+		firstTime = false;
 	}
 
 	if (Current != m_CurrentStatus) 
@@ -396,12 +401,16 @@ void CAutoPilotIniDlg::writeCurrentStatus(bool Update /*= true*/)
 
 
 }
-std::string CAutoPilotIniDlg::GetShortStatus()
+std::string CAutoPilotIniDlg::GetShortStatus() 
+{
+	return GetShortStatus(m_CurrentStatus);
+}
+std::string CAutoPilotIniDlg::GetShortStatus(VersaIniData &CurStatus)
 {
 
 	std::string ret;
-	ret = std::to_string(m_CurrentStatus.status) + " ( ";
-	switch (m_CurrentStatus.status)
+	ret = std::to_string(CurStatus.status) + " ( ";
+	switch (CurStatus.status)
 	{
 
 	case VERSA_STATUS_IDLE:
@@ -445,12 +454,16 @@ std::string CAutoPilotIniDlg::GetShortStatus()
 	
 	return ret;
 }
-std::string CAutoPilotIniDlg::GetSampleType()
+std::string CAutoPilotIniDlg::GetSampleType() 
+{
+	return GetSampleType(m_CurrentStatus);
+}
+std::string CAutoPilotIniDlg::GetSampleType(VersaIniData &CurStatus)
 {
 
 	std::string ret;
-	ret = std::to_string(m_CurrentStatus.sampleType) + " ( ";
-	switch (m_CurrentStatus.sampleType)
+	ret = std::to_string(CurStatus.sampleType) + " ( ";
+	switch (CurStatus.sampleType)
 	{
 
 	case VERSA_STATUS_IDLE:
@@ -774,6 +787,11 @@ void CAutoPilotIniDlg::UpdateStatus()
 	m_EditDelaySeconds2.SetWindowText(std::to_string(m_CurrentStatus.delaySeconds2).c_str());
 	m_Edit_StatusIni.SetWindowText(m_statusFileName.c_str());
 
+
+
+	//m_CurrentStatus.
+
+
 	if (m_logicFlowcam == AP_RUN_MODE_FLOWCAM)
 	{
 		GetDlgItem(IDC_RADIO_LOGIC_FLOW)->SendMessage(BM_SETCHECK, BST_CHECKED, 0);
@@ -830,6 +848,30 @@ void CAutoPilotIniDlg::UpdateStatus()
 
 	m_EditCountDown.SetWindowText(std::to_string(m_CountDown).c_str());
 }
+
+void CAutoPilotIniDlg::WriteHistory(VersaIniData &CurStatus)
+{
+	std::string OutputStatus;
+	OutputStatus = "";
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "==================";
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "Status: " + GetShortStatus(CurStatus);
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "Sample Type: " + GetSampleType(CurStatus);
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "Plate Well: " + CurStatus.plateWell;
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "Barcode: " + CurStatus.barcode;
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "Sample ID: " + CurStatus.sampleID;
+	m_History.AddString(OutputStatus.c_str());
+	OutputStatus = "Sample Volume: " + std::to_string(CurStatus.SampleVolume_ml);
+	m_History.AddString(OutputStatus.c_str());
+
+	m_History.SetCurSel(m_History.GetCount() - 1);
+}
+
 void CAutoPilotIniDlg::FlowcamLogic()
 {
 	if (m_CurrentStatus.status == VERSA_VISUAL_START_OF_DAY)
@@ -900,4 +942,11 @@ void CAutoPilotIniDlg::OnBnClickedRadioLogicNoop()
 	m_logicFlowcam = AP_RUN_MODE_NOOP;
 	writeCurrentStatus();
 
+}
+
+
+void CAutoPilotIniDlg::OnBnClickedButtonClear()
+{
+	// TODO: Add your control notification handler code here
+	m_History.ResetContent();
 }
